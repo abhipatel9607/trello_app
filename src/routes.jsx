@@ -1,27 +1,9 @@
-// routes.js
-
-import { createContext, useState } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
+import Login from "./components/Login";
 import ErrorPage from "./components/ErrorPage";
 import MainContent from "./components/MainContent";
-import Login from "./components/Login";
-import { ChakraProvider } from "@chakra-ui/react";
-import { RouterProvider } from "react-router-dom";
-
-export const UserContext = createContext();
-
-export const AppWithUserContext = () => {
-	const [userData, setUserData] = useState({});
-	console.log(userData);
-	return (
-		<UserContext.Provider value={{ userData, setUserData }}>
-			<ChakraProvider>
-				<RouterProvider router={appRouter} />
-			</ChakraProvider>
-		</UserContext.Provider>
-	);
-};
+// import Login from "./components/Login";
 
 const appRouter = createBrowserRouter([
 	{
@@ -39,3 +21,5 @@ const appRouter = createBrowserRouter([
 		errorElement: <ErrorPage />,
 	},
 ]);
+
+export default appRouter;

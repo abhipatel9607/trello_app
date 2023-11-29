@@ -1,15 +1,13 @@
+/** @format */
+
 import HeroSection from "./HeroSection";
-// import { useEffect } from "react";
+import { UserAuth } from "../googleSingIn/AuthContext";
+import Board from "./Board";
 
 function MainContent() {
-	const login = localStorage.getItem("trello_email");
-	console.log(login);
-	if (!login) return <HeroSection />;
-	return (
-		<div>
-			<h1>Board</h1>
-		</div>
-	);
+  const { user } = UserAuth();
+  if (!user?.displayName) return <HeroSection />;
+  return <Board />;
 }
 
 export default MainContent;
