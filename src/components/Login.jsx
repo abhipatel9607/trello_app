@@ -5,18 +5,26 @@ import { FcGoogle } from "react-icons/fc";
 import loginLeft from "../assets/login_left.png";
 import loginRight from "../assets/login_right.png";
 import { UserAuth } from "../googleSingIn/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 function Login() {
-  const { googleSingIn } = UserAuth();
+  const { googleSingIn, user } = UserAuth();
+  const navigate = useNavigate();
 
   const handleGoogleSingin = async () => {
     try {
       await googleSingIn();
-      window.location = "/";
     } catch (err) {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    if (user != null) {
+      navigate("/board");
+    }
+  }, [user]);
 
   return (
     <Grid

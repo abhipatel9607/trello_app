@@ -15,9 +15,10 @@ const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState({});
 
-  const googleSingIn = async () => {
+  const googleSingIn = () => {
     // const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    // await signInWithPopup(auth, provider);
+    signInWithRedirect(auth, provider);
   };
 
   const logOut = () => {

@@ -1,13 +1,15 @@
 /** @format */
 
-import HeroSection from "./HeroSection";
-import { UserAuth } from "../googleSingIn/AuthContext";
-import Board from "./Board";
+// /** @format */
 
-function MainContent() {
-  const { user } = UserAuth();
-  if (!user?.displayName) return <HeroSection />;
-  return <Board />;
-}
+// import HeroSection from "./HeroSection";
+// import { UserAuth } from "../googleSingIn/AuthContext";
+// import Board from "./Board";
 
-export default MainContent;
+// function MainContent() {
+//   const { user } = UserAuth();
+//   if (!user?.displayName) return <HeroSection />;
+//   return <Board />;
+// }
+
+// export default MainContent;
