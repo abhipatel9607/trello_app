@@ -15,7 +15,6 @@ import { UserAuth } from "../googleSingIn/AuthContext";
 
 function ProfileLogout() {
   const { user, logOut } = UserAuth();
-  console.log(user);
 
   const handleLogOut = async () => {
     try {

@@ -7,6 +7,7 @@ import ErrorPage from "./components/ErrorPage";
 import Protected from "./googleSingIn/Protected";
 import Board from "./components/Board";
 import HeroSection from "./components/HeroSection";
+import List from "./components/List";
 
 const appRouter = createBrowserRouter([
   {
@@ -19,6 +20,14 @@ const appRouter = createBrowserRouter([
         element: (
           <Protected>
             <Board />
+          </Protected>
+        ),
+      },
+      {
+        path: "/list/:boardId",
+        element: (
+          <Protected>
+            <List />
           </Protected>
         ),
       },

@@ -1,15 +1,17 @@
 /** @format */
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import SectionHeader from "./SectionHeader";
+import { UserAuth } from "../googleSingIn/AuthContext";
+import BoardCard from "./BoardCard";
 import {
   Container,
-  Text,
+  Flex,
   Card,
   CardBody,
-  Image,
   Stack,
+  Image,
   Heading,
   Divider,
-  Flex,
   Button,
   useDisclosure,
   Modal,
@@ -21,9 +23,19 @@ import {
   ModalFooter,
   Input,
 } from "@chakra-ui/react";
+import {
+  getAllById,
+  createData,
+  deleteRowFromTable,
+} from "../googleSingIn/firebaseService";
 
 function Board() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [boards, setBoards] = useState([]);
+
+  const { user } = UserAuth();
+  const userUid = user.uid;
+
   const [boardTitle, setBoardTitle] = useState("");
   const [backgroundUrl, setBackgroundUrl] = useState("");
   const [defaultBackgrounds] = useState([
@@ -39,45 +51,59 @@ function Board() {
     setBackgroundUrl(url);
   };
 
-  const handleSubmit = () => {
-    // submission logic
-
-    setBoardTitle("");
-    onClose();
+  const handleDeleteBoard = async (boardId) => {
+    await deleteRowFromTable("board", boardId);
+    await getBoards();
   };
+
+  const getBoards = async () => {
+    if (userUid) {
+      const boardsArray = await getAllById("board", "uid", userUid);
+      setBoards(boardsArray);
+    }
+  };
+
+  const handleCreateBoard = async () => {
+    if (!boardTitle || !backgroundUrl) {
+      alert("Board title and background URL are required.");
+      return;
+    }
+
+    const boardData = {
+      title: boardTitle,
+      bgImg: backgroundUrl,
+      uid: userUid,
+    };
+
+    if (userUid) {
+      await createData(boardData, "board");
+    }
+    await getBoards();
+    onClose();
+    setBoardTitle("");
+    setBackgroundUrl("");
+  };
+
+  useEffect(() => {
+    getBoards();
+  }, [user]);
 
   return (
     <Container maxW="8xl" bg="blue.600" minH="100vh" centerContent>
       <Container p="8" bg="blue.600" color="black" maxW="7xl">
-        <Text color="white" fontSize="3xl" borderBottom="2px solid #999" p={2}>
-          Your Boards
-        </Text>
+        <SectionHeader text="Your Boards" />
 
         <Flex gap="4" wrap="wrap" marginTop="16px">
-          <Card maxW="xs" position="relative" height="150px" cursor="pointer">
-            <Image
-              src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-              alt="Background_Img"
-              borderRadius="lg"
-              h="150px"
-              width="250px"
-              objectFit="cover"
+          {boards.map((board) => (
+            <BoardCard
+              key={board.boardId}
+              title={board.title}
+              bgImg={board.bgImg}
+              // boardId={board.boardId}
+              boardId={board.boardId}
+              onDeleteBoard={handleDeleteBoard}
             />
-
-            <CardBody
-              position="absolute"
-              top="0"
-              p="4"
-              w="100%"
-              bg="rgba(0, 0, 0, 0.1)"
-            >
-              <Stack spacing="3" align="center" color="white">
-                <Heading size="md">Living room Sofa</Heading>
-              </Stack>
-            </CardBody>
-            <Divider />
-          </Card>
-
+          ))}
           {/* New card for creating a new board */}
           <Card
             maxW="xs"
@@ -158,7 +184,7 @@ function Board() {
             </Flex>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+            <Button colorScheme="blue" mr={3} onClick={handleCreateBoard}>
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>
