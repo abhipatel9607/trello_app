@@ -29,7 +29,7 @@ This project is a Trello-inspired task management application built with React. 
 ## Live Demo
 
 - You can see project directly from here
-  [Live Demo](https://trello-app.netlify.app/)
+  [Live Demo](https://trello-app-abhishek.netlify.app/)
 
 ## Getting Started
 
