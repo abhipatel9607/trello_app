@@ -1,13 +1,5 @@
 /** @format */
 import { useEffect, useState } from "react";
-import Card from "./Card";
-import CreateNewCard from "./CreateNewCard";
-import EditCardPopup from "./EditCardPopup";
-import {
-  createData,
-  getAllById,
-  deleteRowFromTable,
-} from "../googleSingIn/firebaseService";
 import {
   Center,
   Box,
@@ -16,52 +8,77 @@ import {
   Text,
   List,
   CloseButton,
-  useDisclosure,
 } from "@chakra-ui/react";
+import { LoadContext } from "../helper/loderConfig";
+import Card from "./Card";
+import CreateNewCard from "./CreateNewCard";
+import {
+  createData,
+  getAllById,
+  deleteRowFromTable,
+} from "../googleSingIn/firebaseService";
 
-function ListCard({ listName, listId, onDeleteList }) {
+// eslint-disable-next-line react/prop-types
+function ListCard({ boardId, listName, listId, onDeleteList }) {
   const [cards, setCards] = useState([]);
   const [newCardTitle, setNewCardTitle] = useState("");
-
-  //
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  //
+  const { setIsLoading } = LoadContext();
 
   const handleCreateCard = async () => {
-    if (!newCardTitle) {
-      alert("Card title required.");
-      return;
-    }
-    const cardData = {
-      listId: listId,
-      title: newCardTitle,
-      description: "",
-      position: "",
-    };
-    await createData(cardData, "card");
+    try {
+      if (!newCardTitle) {
+        alert("Card title required.");
+        return;
+      }
+      setIsLoading(true);
+      const cardData = {
+        listId: listId,
+        title: newCardTitle,
+        description: "",
+        position: "",
+      };
+      await createData(cardData, "card");
 
-    getCards();
-    setNewCardTitle("");
+      getCards();
+      setNewCardTitle("");
+    } catch (error) {
+      console.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteCard = async (cardId) => {
-    console.log(cardId);
-    await deleteRowFromTable("card", cardId);
-    getCards();
+    try {
+      setIsLoading(true);
+      await deleteRowFromTable("card", cardId);
+      getCards();
+    } catch (error) {
+      console.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getCards = async () => {
-    const listsArray = await getAllById("card", "listId", listId);
-    setCards(listsArray);
+    try {
+      setIsLoading(true);
+      const listsArray = await getAllById("card", "listId", listId);
+      setCards(listsArray);
+    } catch (error) {
+      console.error("Error fetching cards:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     getCards();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setCards]);
 
   return (
     <>
-      {" "}
       <Center flexShrink={0} py={6} width={"260px"}>
         <Box
           maxW={"330px"}
@@ -107,10 +124,11 @@ function ListCard({ listName, listId, onDeleteList }) {
               {cards.map((card) => (
                 <Card
                   key={card.cardId}
+                  listId={listId}
                   cardId={card.cardId}
+                  boardId={boardId}
                   title={card.title}
                   onDeleteCard={handleDeleteCard}
-                  onOpen={onOpen}
                 />
               ))}
 
@@ -123,7 +141,6 @@ function ListCard({ listName, listId, onDeleteList }) {
           </Box>
         </Box>
       </Center>
-      <EditCardPopup isOpen={isOpen} onClose={onClose} />
     </>
   );
 }

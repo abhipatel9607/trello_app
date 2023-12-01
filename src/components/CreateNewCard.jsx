@@ -2,13 +2,13 @@
 import { Flex, Input, IconButton } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 
+// eslint-disable-next-line react/prop-types
 function CreateNewCard({ newCardTitle, setNewCardTitle, onCreateCard }) {
   return (
     <Flex
       cursor={"pointer"}
       bgColor={"#eee"}
       rounded={"md"}
-      boxShadow="2xl"
       gap={"4px"}
       px={1}
       py={1}

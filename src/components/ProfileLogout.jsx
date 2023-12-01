@@ -12,6 +12,7 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Flex } from "@chakra-ui/react";
 
 import { UserAuth } from "../googleSingIn/AuthContext";
+import { Link } from "react-router-dom";
 
 function ProfileLogout() {
   const { user, logOut } = UserAuth();
@@ -33,6 +34,11 @@ function ProfileLogout() {
         </MenuButton>
 
         <MenuList>
+          <Link to="/board">
+            <MenuItem minH="40px">
+              <span>Board</span>
+            </MenuItem>
+          </Link>
           <MenuItem minH="40px">
             <span>{user?.email}</span>
           </MenuItem>

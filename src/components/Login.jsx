@@ -24,6 +24,7 @@ function Login() {
     if (user != null) {
       navigate("/board");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (

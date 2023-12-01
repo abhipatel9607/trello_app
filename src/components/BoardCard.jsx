@@ -10,11 +10,11 @@ import {
 import { CloseButton } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
+// eslint-disable-next-line react/prop-types
 function BoardCard({ title, bgImg, boardId, onDeleteBoard }) {
   return (
     <div>
       <Card maxW="xs" position="relative" height="150px" cursor="pointer">
-        {/* Close button in the top right corner */}
         <CloseButton
           position="absolute"
           top="1"
@@ -28,7 +28,7 @@ function BoardCard({ title, bgImg, boardId, onDeleteBoard }) {
             onDeleteBoard(boardId);
           }}
         />
-        <Link to={`/list/${boardId}`}>
+        <Link to={`/board/${boardId}`}>
           <Image
             src={bgImg}
             alt="Background_Img"

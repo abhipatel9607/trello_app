@@ -11,46 +11,77 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
+// Get all documents in a collection filtered by a property
 export const getAllById = async (tableName, compareProperty, compareValue) => {
-  const boardsCollectionRef = collection(db, tableName);
-  const q = query(
-    boardsCollectionRef,
-    where(compareProperty, "==", compareValue),
-    orderBy("createdAt")
-  );
-  const boardData = await getDocs(q);
-  return boardData.docs.map((doc) => ({
-    [`${tableName}Id`]: doc.id,
-    ...doc.data(),
-  }));
+  try {
+    const collectionRef = collection(db, tableName);
+    const q = query(
+      collectionRef,
+      where(compareProperty, "==", compareValue),
+      orderBy("createdAt")
+    );
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.map((doc) => ({
+      [`${tableName}Id`]: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error(`Error getting all ${tableName}:`, error);
+  }
 };
 
+// Create a new document in a collection
 export const createData = async (data, tableName) => {
-  const boardsCollectionRef = collection(db, tableName);
-  const newDocRef = await addDoc(boardsCollectionRef, {
-    ...data,
-    createdAt: serverTimestamp(),
-  });
-  console.log(newDocRef);
+  try {
+    const collectionRef = collection(db, tableName);
+    await addDoc(collectionRef, {
+      ...data,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error(`Error creating ${tableName} data:`, error);
+  }
 };
 
+// Delete a document from a collection
 export const deleteRowFromTable = async (tableName, tableId) => {
-  const deleteBoardRow = doc(db, tableName, tableId);
-  await deleteDoc(deleteBoardRow);
+  try {
+    const deleteDocRef = doc(db, tableName, tableId);
+    await deleteDoc(deleteDocRef);
+  } catch (error) {
+    console.error(`Error deleting ${tableName} row:`, error);
+  }
 };
 
+// Find a document by ID in a collection
 export const findById = async (tableName, tableId) => {
-  const boardRef = doc(collection(db, tableName), tableId);
-  const boardSnapshot = await getDoc(boardRef);
+  try {
+    const docRef = doc(collection(db, tableName), tableId);
+    const docSnapshot = await getDoc(docRef);
 
-  if (boardSnapshot.exists()) {
-    const boardData = boardSnapshot.data();
-    return boardData;
-  } else {
-    console.log("Document does not exist");
-    return null;
+    if (docSnapshot.exists()) {
+      return docSnapshot.data();
+    } else {
+      console.log("Document does not exist");
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error finding ${tableName} by ID:`, error);
+  }
+};
+
+// Update a document in a collection
+export const updateData = async (tableName, tableId, updatedData) => {
+  try {
+    const docRef = doc(db, tableName, tableId);
+    await updateDoc(docRef, { ...updatedData, editedAt: serverTimestamp() });
+    console.log("Document successfully updated!");
+  } catch (error) {
+    console.error(`Error updating ${tableName} document:`, error);
   }
 };

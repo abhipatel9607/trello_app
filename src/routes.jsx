@@ -8,6 +8,7 @@ import Protected from "./googleSingIn/Protected";
 import Board from "./components/Board";
 import HeroSection from "./components/HeroSection";
 import List from "./components/List";
+import EditCard from "./components/EditCard";
 
 const appRouter = createBrowserRouter([
   {
@@ -24,10 +25,18 @@ const appRouter = createBrowserRouter([
         ),
       },
       {
-        path: "/list/:boardId",
+        path: "/board/:boardId",
         element: (
           <Protected>
             <List />
+          </Protected>
+        ),
+      },
+      {
+        path: "/editCard/:boardId/:listId/:cardId",
+        element: (
+          <Protected>
+            <EditCard />
           </Protected>
         ),
       },

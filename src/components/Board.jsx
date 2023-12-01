@@ -1,8 +1,15 @@
 /** @format */
+
 import { useEffect, useState } from "react";
 import SectionHeader from "./SectionHeader";
 import { UserAuth } from "../googleSingIn/AuthContext";
 import BoardCard from "./BoardCard";
+import { LoadContext } from "../helper/loderConfig";
+import {
+  getAllById,
+  createData,
+  deleteRowFromTable,
+} from "../googleSingIn/firebaseService";
 import {
   Container,
   Flex,
@@ -23,88 +30,110 @@ import {
   ModalFooter,
   Input,
 } from "@chakra-ui/react";
-import {
-  getAllById,
-  createData,
-  deleteRowFromTable,
-} from "../googleSingIn/firebaseService";
 
 function Board() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [boards, setBoards] = useState([]);
+  const [boardTitle, setBoardTitle] = useState("");
+  const [backgroundUrl, setBackgroundUrl] = useState("");
+
+  const { setIsLoading } = LoadContext();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { user } = UserAuth();
   const userUid = user.uid;
 
-  const [boardTitle, setBoardTitle] = useState("");
-  const [backgroundUrl, setBackgroundUrl] = useState("");
   const [defaultBackgrounds] = useState([
-    "https://t4.ftcdn.net/jpg/05/72/54/67/360_F_572546714_2mn39TUv2f5Lmg7JRT9yvSkuTJERGyg8.jpg",
-    "https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg",
-    "https://static.vecteezy.com/system/resources/thumbnails/006/240/302/small/abstract-soft-focus-sunset-field-landscape-of-yellow-flowers-and-grass-meadow-warm-golden-hour-sunset-sunrise-time-tranquil-spring-summer-nature-closeup-and-blurred-forest-background-idyllic-nature-photo.jpg",
-    "https://static.vecteezy.com/system/resources/thumbnails/001/838/464/small/golden-black-premium-background-free-vector.jpg",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSd6WkUKD5tTM0w5tADvwSiRdw2_zvrSo3P_A&usqp=CAU",
-    "https://t4.ftcdn.net/jpg/05/49/86/39/360_F_549863991_6yPKI08MG7JiZX83tMHlhDtd6XLFAMce.jpg",
+    "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1511300636408-a63a89df3482?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1545641203-7d072a14e3b2?q=80&w=1333&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1537819191377-d3305ffddce4?q=80&w=1421&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1498550744921-75f79806b8a7?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1473654729523-203e25dfda10?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   ]);
 
+  // Functions
   const handleSelectBackground = (url) => {
     setBackgroundUrl(url);
   };
 
   const handleDeleteBoard = async (boardId) => {
-    await deleteRowFromTable("board", boardId);
-    await getBoards();
+    try {
+      setIsLoading(true);
+      await deleteRowFromTable("board", boardId);
+      await getBoards();
+    } catch (error) {
+      console.error("Error deleting board:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getBoards = async () => {
-    if (userUid) {
-      const boardsArray = await getAllById("board", "uid", userUid);
-      setBoards(boardsArray);
+    try {
+      if (userUid) {
+        setIsLoading(true);
+        const boardsArray = await getAllById("board", "uid", userUid);
+        setBoards(boardsArray);
+      }
+    } catch (error) {
+      console.error("Error getting boards:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleCreateBoard = async () => {
-    if (!boardTitle || !backgroundUrl) {
-      alert("Board title and background URL are required.");
-      return;
-    }
+    try {
+      if (!boardTitle || !backgroundUrl) {
+        alert("Board title and background URL are required.");
+        return;
+      }
 
-    const boardData = {
-      title: boardTitle,
-      bgImg: backgroundUrl,
-      uid: userUid,
-    };
+      onClose();
+      setIsLoading(true);
 
-    if (userUid) {
-      await createData(boardData, "board");
+      const boardData = {
+        title: boardTitle,
+        bgImg: backgroundUrl,
+        uid: userUid,
+      };
+
+      if (userUid) {
+        await createData(boardData, "board");
+      }
+
+      await getBoards();
+      setBoardTitle("");
+      setBackgroundUrl("");
+    } catch (error) {
+      console.error("Error creating board:", error);
+    } finally {
+      setIsLoading(false);
     }
-    await getBoards();
-    onClose();
-    setBoardTitle("");
-    setBackgroundUrl("");
   };
 
   useEffect(() => {
     getBoards();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
     <Container maxW="8xl" bg="blue.600" minH="100vh" centerContent>
       <Container p="8" bg="blue.600" color="black" maxW="7xl">
         <SectionHeader text="Your Boards" />
-
         <Flex gap="4" wrap="wrap" marginTop="16px">
+          {/* Render Boards */}
           {boards.map((board) => (
             <BoardCard
               key={board.boardId}
               title={board.title}
               bgImg={board.bgImg}
-              // boardId={board.boardId}
               boardId={board.boardId}
               onDeleteBoard={handleDeleteBoard}
             />
           ))}
-          {/* New card for creating a new board */}
+
+          {/* create a new board */}
           <Card
             maxW="xs"
             position="relative"
@@ -113,7 +142,6 @@ function Board() {
             onClick={onOpen}
           >
             <Container borderRadius="lg" h="150px" width="250px"></Container>
-
             <CardBody
               position="absolute"
               top="0"

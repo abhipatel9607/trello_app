@@ -1,24 +1,17 @@
 /** @format */
 
 import { useContext, createContext, useEffect, useState } from "react";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
+import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, provider } from "./firebaseConfig";
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react/prop-types
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState({});
 
   const googleSingIn = async () => {
-    // const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
-    // signInWithRedirect(auth, provider);
   };
 
   const logOut = () => {

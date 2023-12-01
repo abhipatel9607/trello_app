@@ -1,8 +1,11 @@
 /** @format */
 import { Flex, ListItem, Icon } from "@chakra-ui/react";
 import { CloseIcon, EditIcon } from "@chakra-ui/icons";
+import { Link } from "react-router-dom";
 
-function Card({ cardId, title, onDeleteCard, onOpen }) {
+// eslint-disable-next-line react/prop-types
+function Card({ boardId, listId, cardId, title, onDeleteCard }) {
+  console.log("list:", listId, "card:", cardId);
   return (
     <Flex
       cursor={"pointer"}
@@ -16,13 +19,9 @@ function Card({ cardId, title, onDeleteCard, onOpen }) {
       <ListItem>{title}</ListItem>
       <Flex>
         <ListItem>
-          <Icon
-            onClick={onOpen}
-            as={EditIcon}
-            ml={2}
-            color="blue.500"
-            cursor="pointer"
-          />
+          <Link to={`/editCard/${boardId}/${listId}/${cardId}`}>
+            <Icon as={EditIcon} ml={2} color="blue.500" cursor="pointer" />
+          </Link>
         </ListItem>
         <ListItem>
           <Icon

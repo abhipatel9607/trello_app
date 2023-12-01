@@ -7,6 +7,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 
+// eslint-disable-next-line react/prop-types
 function CreateNewList({ newListTitle, setNewListTitle, onCreateList }) {
   return (
     <Center flexShrink={0} alignItems={"start"} py={6} width={"260px"}>
