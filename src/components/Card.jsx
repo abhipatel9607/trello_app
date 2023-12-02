@@ -1,5 +1,5 @@
 /** @format */
-import { Flex, ListItem, Icon } from "@chakra-ui/react";
+import { Flex, ListItem, Icon, position } from "@chakra-ui/react";
 import {
   CloseIcon,
   ArrowForwardIcon,
@@ -22,6 +22,7 @@ function Card({
   listPosition,
   onMoveUpCard,
   onMoveDownCard,
+  onMoveCardRight,
 }) {
   const handleRedirectToEditCard = () => {
     window.location = `/editCard/${boardId}/${listId}/${cardId}`;
@@ -63,6 +64,7 @@ function Card({
               fontSize={"18px"}
               color="blue.500"
               cursor="pointer"
+              onClick={() => onMoveCardRight(listPosition, cardId)}
             />
           </ListItem>
         )}

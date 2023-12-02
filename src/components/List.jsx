@@ -165,6 +165,8 @@ function ListPage() {
               listId={list.listId}
               onDeleteList={handleDeleteList}
               boardId={boardId}
+              lists={lists}
+              onGetList={getList}
               listsLength={listsLength}
               listPosition={list.position}
               onShiftListLeft={handleShiftListLeft}

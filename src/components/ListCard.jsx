@@ -30,6 +30,8 @@ function ListCard({
   boardId,
   listName,
   listId,
+  lists,
+  onGetList,
   onDeleteList,
   listsLength,
   listPosition,
@@ -111,30 +113,7 @@ function ListCard({
     }
   };
 
-  // const handleDeleteList = async (listId, position) => {
-  //   try {
-  //     setIsLoading(true);
-  //     if (lists[position]) {
-  //       const newList = lists.slice(position);
-  //       console.log(newList, "nnnnnnnnnnnnnnnnnnnnnnnnn");
-  //       newList.forEach(async (list) => {
-  //         const id = list.listId;
-  //         const newPosition = list.position - 1;
-  //         await updateData("list", id, {
-  //           position: newPosition,
-  //         });
-  //       });
-  //     }
-  //     await deleteRowFromTable("list", listId);
-  //     getList();
-  //   } catch (error) {
-  //     console.error(error.message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  const getCards = async () => {
+  async function getCards() {
     try {
       setIsLoading(true);
       const listsArray = await getAllById("card", "listId", listId, "position");
@@ -144,6 +123,30 @@ function ListCard({
     } finally {
       setIsLoading(false);
     }
+  }
+
+  const handleMoveCardRight = async (position, cardId) => {
+    setIsLoading(true);
+    let cardData = cards.find((card) => card.cardId === cardId);
+    let nextList = lists.find((list) => list.position === position + 1);
+    const nextListCards = await getAllById(
+      "card",
+      "listId",
+      nextList.listId,
+      "position"
+    );
+    const newCardData = {
+      listId: nextList.listId,
+      position: nextListCards.length + 1,
+      title: cardData.title,
+      description: cardData.description,
+    };
+    await createData(newCardData, "card");
+    await deleteRowFromTable("card", cardId);
+    onGetList();
+    setIsLoading(true);
+
+    // window.location.reload();
   };
 
   useEffect(() => {
@@ -234,6 +237,7 @@ function ListCard({
                     listPosition={listPosition}
                     onMoveUpCard={handleMoveUpCard}
                     onMoveDownCard={handleMoveDownCard}
+                    onMoveCardRight={handleMoveCardRight}
                   />
                 ))}
 
