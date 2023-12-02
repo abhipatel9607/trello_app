@@ -1,11 +1,31 @@
 /** @format */
 import { Flex, ListItem, Icon } from "@chakra-ui/react";
-import { CloseIcon, EditIcon } from "@chakra-ui/icons";
+import {
+  CloseIcon,
+  ArrowForwardIcon,
+  ArrowBackIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+} from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 
 // eslint-disable-next-line react/prop-types
-function Card({ boardId, listId, cardId, title, onDeleteCard }) {
-  console.log("list:", listId, "card:", cardId);
+function Card({
+  boardId,
+  listId,
+  cardId,
+  title,
+  onDeleteCard,
+  cardPosition,
+  cardslength,
+  listsLength,
+  listPosition,
+  onMoveUpCard,
+  onMoveDownCard,
+}) {
+  const handleRedirectToEditCard = () => {
+    window.location = `/editCard/${boardId}/${listId}/${cardId}`;
+  };
   return (
     <Flex
       cursor={"pointer"}
@@ -16,21 +36,65 @@ function Card({ boardId, listId, cardId, title, onDeleteCard }) {
       py={2}
       justifyContent="space-between"
     >
-      <ListItem>{title}</ListItem>
+      <ListItem
+        onClick={handleRedirectToEditCard}
+        wordBreak={"break-word"}
+        width={"80%"}
+      >
+        {title}
+      </ListItem>
       <Flex>
-        <ListItem>
-          <Link to={`/editCard/${boardId}/${listId}/${cardId}`}>
-            <Icon as={EditIcon} ml={2} color="blue.500" cursor="pointer" />
-          </Link>
-        </ListItem>
+        {cardPosition !== 1 && (
+          <ListItem>
+            <Icon
+              fontSize={"18px"}
+              as={ArrowUpIcon}
+              color="blue.500"
+              cursor="pointer"
+              onClick={() => onMoveUpCard(cardPosition)}
+            />
+          </ListItem>
+        )}
+
+        {listsLength !== listPosition && (
+          <ListItem>
+            <Icon
+              as={ArrowForwardIcon}
+              fontSize={"18px"}
+              color="blue.500"
+              cursor="pointer"
+            />
+          </ListItem>
+        )}
+        {cardslength !== cardPosition && (
+          <ListItem>
+            <Icon
+              as={ArrowDownIcon}
+              fontSize={"18px"}
+              color="blue.500"
+              cursor="pointer"
+              onClick={() => onMoveDownCard(cardPosition)}
+            />
+          </ListItem>
+        )}
+        {listPosition !== 1 && (
+          <ListItem>
+            <Icon
+              as={ArrowBackIcon}
+              fontSize={"18px"}
+              color="blue.500"
+              cursor="pointer"
+            />
+          </ListItem>
+        )}
         <ListItem>
           <Icon
             as={CloseIcon}
-            ml={2}
-            width={"12px"}
+            ml={1}
+            fontSize={"12px"}
             color="blue.500"
             cursor="pointer"
-            onClick={() => onDeleteCard(cardId)}
+            onClick={() => onDeleteCard(cardId, cardPosition)}
           />
         </ListItem>
       </Flex>

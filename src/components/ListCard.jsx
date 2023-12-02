@@ -1,13 +1,16 @@
 /** @format */
 import { useEffect, useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   Center,
   Box,
   useColorModeValue,
-  Stack,
+  Flex,
+  Icon,
   Text,
   List,
   CloseButton,
+  list,
 } from "@chakra-ui/react";
 import { LoadContext } from "../helper/loderConfig";
 import Card from "./Card";
@@ -16,13 +19,53 @@ import {
   createData,
   getAllById,
   deleteRowFromTable,
+  getCardAndNextCardByPosition,
+  updateData,
+  getCardAndPrevCardByPosition,
 } from "../googleSingIn/firebaseService";
+import { swapCardData } from "../helper/helperFunctions";
 
 // eslint-disable-next-line react/prop-types
-function ListCard({ boardId, listName, listId, onDeleteList }) {
-  const [cards, setCards] = useState([]);
+function ListCard({
+  boardId,
+  listName,
+  listId,
+  onDeleteList,
+  listsLength,
+  listPosition,
+  onShiftListLeft,
+  onShiftListRight,
+}) {
+  const [cards, setCards] = useState(null);
   const [newCardTitle, setNewCardTitle] = useState("");
   const { setIsLoading } = LoadContext();
+  console.log(cards);
+  const handleMoveUpCard = async (position) => {
+    const swapEl = await getCardAndPrevCardByPosition(
+      "card",
+      "position",
+      position,
+      "position",
+      listId
+    );
+
+    swapCardData(swapEl);
+    swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
+    getCards();
+  };
+  const handleMoveDownCard = async (position) => {
+    const swapEl = await getCardAndNextCardByPosition(
+      "card",
+      "position",
+      position,
+      "position",
+      listId
+    );
+    console.log(swapEl);
+    swapCardData(swapEl);
+    swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
+    getCards();
+  };
 
   const handleCreateCard = async () => {
     try {
@@ -35,7 +78,7 @@ function ListCard({ boardId, listName, listId, onDeleteList }) {
         listId: listId,
         title: newCardTitle,
         description: "",
-        position: "",
+        position: cards.length + 1,
       };
       await createData(cardData, "card");
 
@@ -48,9 +91,17 @@ function ListCard({ boardId, listName, listId, onDeleteList }) {
     }
   };
 
-  const handleDeleteCard = async (cardId) => {
+  const handleDeleteCard = async (cardId, position) => {
     try {
       setIsLoading(true);
+      if (cards[position]) {
+        const newCard = cards.slice(position);
+        newCard.forEach(async (card) => {
+          const id = card.cardId;
+          const newPosition = card.position - 1;
+          await updateData("card", id, { position: newPosition });
+        });
+      }
       await deleteRowFromTable("card", cardId);
       getCards();
     } catch (error) {
@@ -60,10 +111,33 @@ function ListCard({ boardId, listName, listId, onDeleteList }) {
     }
   };
 
+  // const handleDeleteList = async (listId, position) => {
+  //   try {
+  //     setIsLoading(true);
+  //     if (lists[position]) {
+  //       const newList = lists.slice(position);
+  //       console.log(newList, "nnnnnnnnnnnnnnnnnnnnnnnnn");
+  //       newList.forEach(async (list) => {
+  //         const id = list.listId;
+  //         const newPosition = list.position - 1;
+  //         await updateData("list", id, {
+  //           position: newPosition,
+  //         });
+  //       });
+  //     }
+  //     await deleteRowFromTable("list", listId);
+  //     getList();
+  //   } catch (error) {
+  //     console.error(error.message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const getCards = async () => {
     try {
       setIsLoading(true);
-      const listsArray = await getAllById("card", "listId", listId);
+      const listsArray = await getAllById("card", "listId", listId, "position");
       setCards(listsArray);
     } catch (error) {
       console.error("Error fetching cards:", error);
@@ -92,27 +166,51 @@ function ListCard({ boardId, listName, listId, onDeleteList }) {
         >
           <CloseButton
             position="absolute"
-            top="1"
-            right="1"
+            top="0"
+            right="0"
             color="black"
             width="20px"
             height="20px"
-            bgColor="#aaa"
             zIndex="10"
             onClick={() => {
-              onDeleteList(listId);
+              onDeleteList(listId, listPosition);
             }}
           />
-          <Stack
-            textAlign={"center"}
-            p={3}
-            color={useColorModeValue("gray.800", "white")}
+
+          <Flex
             align={"center"}
+            justify={"center"}
+            color={useColorModeValue("gray.800", "white")}
+            pt={6}
+            pb={6}
           >
-            <Text color={"gray.800"} fontWeight={"bolder"}>
+            {listPosition !== 1 && (
+              <Icon
+                as={ChevronLeftIcon}
+                fontSize={"24px"}
+                color="blue.500"
+                cursor="pointer"
+                onClick={() => onShiftListLeft(listPosition)}
+              />
+            )}
+
+            <Text
+              color={"gray.800"}
+              wordBreak={"break-word"}
+              fontWeight={"bolder"}
+            >
               {listName}
             </Text>
-          </Stack>
+            {listPosition !== listsLength && (
+              <Icon
+                as={ChevronRightIcon}
+                fontSize={"24px"}
+                color="blue.500"
+                cursor="pointer"
+                onClick={() => onShiftListRight(listPosition)}
+              />
+            )}
+          </Flex>
 
           <Box
             bg={useColorModeValue("gray.50", "gray.900")}
@@ -121,16 +219,23 @@ function ListCard({ boardId, listName, listId, onDeleteList }) {
             py={2}
           >
             <List spacing={2}>
-              {cards.map((card) => (
-                <Card
-                  key={card.cardId}
-                  listId={listId}
-                  cardId={card.cardId}
-                  boardId={boardId}
-                  title={card.title}
-                  onDeleteCard={handleDeleteCard}
-                />
-              ))}
+              {cards &&
+                cards.map((card) => (
+                  <Card
+                    key={card.cardId}
+                    listId={listId}
+                    cardId={card.cardId}
+                    boardId={boardId}
+                    title={card.title}
+                    onDeleteCard={handleDeleteCard}
+                    cardPosition={card.position}
+                    cardslength={cards.length}
+                    listsLength={listsLength}
+                    listPosition={listPosition}
+                    onMoveUpCard={handleMoveUpCard}
+                    onMoveDownCard={handleMoveDownCard}
+                  />
+                ))}
 
               <CreateNewCard
                 newCardTitle={newCardTitle}

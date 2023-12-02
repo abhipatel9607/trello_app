@@ -32,7 +32,7 @@ import {
 } from "@chakra-ui/react";
 
 function Board() {
-  const [boards, setBoards] = useState([]);
+  const [boards, setBoards] = useState(null);
   const [boardTitle, setBoardTitle] = useState("");
   const [backgroundUrl, setBackgroundUrl] = useState("");
 
@@ -72,7 +72,7 @@ function Board() {
     try {
       if (userUid) {
         setIsLoading(true);
-        const boardsArray = await getAllById("board", "uid", userUid);
+        const boardsArray = await getAllById("board", "uid", userUid,"createdAt");
         setBoards(boardsArray);
       }
     } catch (error) {
@@ -123,15 +123,16 @@ function Board() {
         <SectionHeader text="Your Boards" />
         <Flex gap="4" wrap="wrap" marginTop="16px">
           {/* Render Boards */}
-          {boards.map((board) => (
-            <BoardCard
-              key={board.boardId}
-              title={board.title}
-              bgImg={board.bgImg}
-              boardId={board.boardId}
-              onDeleteBoard={handleDeleteBoard}
-            />
-          ))}
+          {boards &&
+            boards.map((board) => (
+              <BoardCard
+                key={board.boardId}
+                title={board.title}
+                bgImg={board.bgImg}
+                boardId={board.boardId}
+                onDeleteBoard={handleDeleteBoard}
+              />
+            ))}
 
           {/* create a new board */}
           <Card

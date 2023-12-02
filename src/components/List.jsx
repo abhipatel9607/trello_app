@@ -11,8 +11,12 @@ import {
   deleteRowFromTable,
   findById,
   getAllById,
+  updateData,
+  getListAndNextListByPosition,
+  getListAndPrevListByPosition,
 } from "../googleSingIn/firebaseService";
 import { LoadContext } from "../helper/loderConfig";
+import { swapListData } from "../helper/helperFunctions";
 
 function ListPage() {
   const { boardId } = useParams();
@@ -20,6 +24,34 @@ function ListPage() {
   const [boardData, setBoardData] = useState(null);
   const [newListTitle, setNewListTitle] = useState("");
   const { setIsLoading } = LoadContext();
+  const listsLength = lists.length;
+
+  const handleShiftListLeft = async (position) => {
+    const swapEl = await getListAndPrevListByPosition(
+      "list",
+      "position",
+      position,
+      "position"
+    );
+    const swapData = swapEl.filter((el) => el.boardId === boardId);
+
+    const swapedData = swapListData(swapData);
+    swapedData.forEach(async (el) => await updateData("list", el.listId, el));
+    await getList();
+  };
+
+  const handleShiftListRight = async (position) => {
+    const swapEl = await getListAndNextListByPosition(
+      "list",
+      "position",
+      position,
+      "position",
+      boardId
+    );
+    swapListData(swapEl);
+    swapEl.forEach(async (el) => await updateData("list", el.listId, el));
+    await getList();
+  };
 
   const handleCreateList = async () => {
     try {
@@ -33,7 +65,7 @@ function ListPage() {
       const listData = {
         title: newListTitle,
         boardId: boardId,
-        position: "",
+        position: listsLength + 1,
       };
 
       await createData(listData, "list");
@@ -46,9 +78,19 @@ function ListPage() {
     }
   };
 
-  const handleDeleteList = async (listId) => {
+  const handleDeleteList = async (listId, position) => {
     try {
       setIsLoading(true);
+      if (lists[position]) {
+        const newList = lists.slice(position);
+        newList.forEach(async (list) => {
+          const id = list.listId;
+          const newPosition = list.position - 1;
+          await updateData("list", id, {
+            position: newPosition,
+          });
+        });
+      }
       await deleteRowFromTable("list", listId);
       getList();
     } catch (error) {
@@ -58,17 +100,22 @@ function ListPage() {
     }
   };
 
-  const getList = async () => {
+  async function getList() {
     try {
       setIsLoading(true);
-      const listsArray = await getAllById("list", "boardId", boardId);
+      const listsArray = await getAllById(
+        "list",
+        "boardId",
+        boardId,
+        "position"
+      );
       setLists(listsArray);
     } catch (error) {
       console.error("Error fetching lists:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     getList();
@@ -118,6 +165,10 @@ function ListPage() {
               listId={list.listId}
               onDeleteList={handleDeleteList}
               boardId={boardId}
+              listsLength={listsLength}
+              listPosition={list.position}
+              onShiftListLeft={handleShiftListLeft}
+              onShiftListRight={handleShiftListRight}
             />
           ))}
 

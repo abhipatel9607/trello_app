@@ -14,15 +14,21 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
+import { position } from "@chakra-ui/react";
 
-// Get all documents in a collection filtered by a property
-export const getAllById = async (tableName, compareProperty, compareValue) => {
+// Get all documents in a collection filtered and ordered by a property
+export const getAllById = async (
+  tableName,
+  compareProperty,
+  compareValue,
+  getOrderBy
+) => {
   try {
     const collectionRef = collection(db, tableName);
     const q = query(
       collectionRef,
       where(compareProperty, "==", compareValue),
-      orderBy("createdAt")
+      orderBy(getOrderBy)
     );
     const querySnapshot = await getDocs(q);
 
@@ -42,6 +48,7 @@ export const createData = async (data, tableName) => {
     await addDoc(collectionRef, {
       ...data,
       createdAt: serverTimestamp(),
+      editedAt: serverTimestamp(),
     });
   } catch (error) {
     console.error(`Error creating ${tableName} data:`, error);
@@ -83,5 +90,115 @@ export const updateData = async (tableName, tableId, updatedData) => {
     console.log("Document successfully updated!");
   } catch (error) {
     console.error(`Error updating ${tableName} document:`, error);
+  }
+};
+
+// Get array of 2 elements by position and next position(card)
+export const getCardAndNextCardByPosition = async (
+  tableName,
+  compareProperty,
+  compareValue,
+  getOrderBy,
+  compareId
+) => {
+  try {
+    const collectionRef = collection(db, tableName);
+    const q = query(
+      collectionRef,
+      where(compareProperty, "in", [compareValue, compareValue + 1]),
+      orderBy(getOrderBy)
+    );
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs
+      .map((doc) => ({
+        [`${tableName}Id`]: doc.id,
+        ...doc.data(),
+      }))
+      .filter((item) => item.listId === compareId);
+  } catch (error) {
+    console.error(`Error getting all ${tableName}:`, error);
+  }
+};
+
+// Get array of 2 elements by position and prev position(card)
+export const getCardAndPrevCardByPosition = async (
+  tableName,
+  compareProperty,
+  compareValue,
+  getOrderBy,
+  compareId
+) => {
+  try {
+    const collectionRef = collection(db, tableName);
+    const q = query(
+      collectionRef,
+      where(compareProperty, "in", [compareValue, compareValue - 1]),
+      orderBy(getOrderBy)
+    );
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs
+      .map((doc) => ({
+        [`${tableName}Id`]: doc.id,
+        ...doc.data(),
+      }))
+      .filter((item) => item.listId === compareId);
+  } catch (error) {
+    console.error(`Error getting all ${tableName}:`, error);
+  }
+};
+
+// Get array of 2 elements by position and next position(list)
+export const getListAndNextListByPosition = async (
+  tableName,
+  compareProperty,
+  compareValue,
+  getOrderBy,
+  compareId
+) => {
+  try {
+    const collectionRef = collection(db, tableName);
+    const q = query(
+      collectionRef,
+      where(compareProperty, "in", [compareValue, compareValue + 1]),
+      orderBy(getOrderBy)
+    );
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs
+      .map((doc) => ({
+        [`${tableName}Id`]: doc.id,
+        ...doc.data(),
+      }))
+      .filter((item) => item.boardId === compareId);
+  } catch (error) {
+    console.error(`Error getting all ${tableName}:`, error);
+  }
+};
+
+// Get array of 2 elements by position and prev position(card)
+export const getListAndPrevListByPosition = async (
+  tableName,
+  compareProperty,
+  compareValue,
+  getOrderBy,
+) => {
+  try {
+    const collectionRef = collection(db, tableName);
+    const q = query(
+      collectionRef,
+      where(compareProperty, "in", [compareValue, compareValue - 1]),
+      orderBy(getOrderBy)
+    );
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs
+      .map((doc) => ({
+        [`${tableName}Id`]: doc.id,
+        ...doc.data(),
+      }))
+  } catch (error) {
+    console.error(`Error getting all ${tableName}:`, error);
   }
 };

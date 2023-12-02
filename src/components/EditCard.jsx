@@ -39,6 +39,7 @@ function EditCard() {
   const [newTodo, setNewTodo] = useState("");
   const [newComment, setNewComment] = useState("");
   const { setIsLoading } = LoadContext();
+  console.log(todoData);
 
   // Function
   const handleCreateNewTodo = async () => {
@@ -118,7 +119,7 @@ function EditCard() {
   const getTodos = async () => {
     try {
       setIsLoading(true);
-      const data = await getAllById("todo", "cardId", cardId);
+      const data = await getAllById("todo", "cardId", cardId, "createdAt");
       setTodoData(data);
     } catch (error) {
       console.error("Error fetching board details:", error);
@@ -130,7 +131,7 @@ function EditCard() {
   const getComments = async () => {
     try {
       setIsLoading(true);
-      const data = await getAllById("comment", "cardId", cardId);
+      const data = await getAllById("comment", "cardId", cardId, "createdAt");
       setCommentData(data);
     } catch (error) {
       console.error("Error fetching board details:", error);
