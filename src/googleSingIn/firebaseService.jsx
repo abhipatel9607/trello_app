@@ -14,7 +14,6 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-import { position } from "@chakra-ui/react";
 
 // Get all documents in a collection filtered and ordered by a property
 export const getAllById = async (
@@ -182,7 +181,7 @@ export const getListAndPrevListByPosition = async (
   tableName,
   compareProperty,
   compareValue,
-  getOrderBy,
+  getOrderBy
 ) => {
   try {
     const collectionRef = collection(db, tableName);
@@ -193,11 +192,10 @@ export const getListAndPrevListByPosition = async (
     );
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs
-      .map((doc) => ({
-        [`${tableName}Id`]: doc.id,
-        ...doc.data(),
-      }))
+    return querySnapshot.docs.map((doc) => ({
+      [`${tableName}Id`]: doc.id,
+      ...doc.data(),
+    }));
   } catch (error) {
     console.error(`Error getting all ${tableName}:`, error);
   }

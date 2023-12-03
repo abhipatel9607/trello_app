@@ -16,15 +16,20 @@ import {
   getListAndPrevListByPosition,
 } from "../googleSingIn/firebaseService";
 import { LoadContext } from "../helper/loderConfig";
-import { swapListData } from "../helper/helperFunctions";
+import {
+  reducePositionOfSubsequentCard,
+  reducePositionOfSubsequentList,
+  swapListData,
+} from "../helper/helperFunctions";
 
 function ListPage() {
   const { boardId } = useParams();
-  const [lists, setLists] = useState([]);
   const [boardData, setBoardData] = useState(null);
   const [newListTitle, setNewListTitle] = useState("");
   const { setIsLoading } = LoadContext();
-  const listsLength = lists.length;
+
+  const [listData, setListData] = useState([]);
+  console.log(listData);
 
   const handleShiftListLeft = async (position) => {
     const swapEl = await getListAndPrevListByPosition(
@@ -37,7 +42,7 @@ function ListPage() {
 
     const swapedData = swapListData(swapData);
     swapedData.forEach(async (el) => await updateData("list", el.listId, el));
-    await getList();
+    await fetchData();
   };
 
   const handleShiftListRight = async (position) => {
@@ -50,7 +55,7 @@ function ListPage() {
     );
     swapListData(swapEl);
     swapEl.forEach(async (el) => await updateData("list", el.listId, el));
-    await getList();
+    await fetchData();
   };
 
   const handleCreateList = async () => {
@@ -62,14 +67,13 @@ function ListPage() {
 
       setIsLoading(true);
 
-      const listData = {
+      const newListData = {
         title: newListTitle,
         boardId: boardId,
-        position: listsLength + 1,
+        position: listData.length + 1,
       };
-
-      await createData(listData, "list");
-      getList();
+      await createData(newListData, "list");
+      await fetchData();
       setNewListTitle("");
     } catch (error) {
       console.error(error.message);
@@ -81,18 +85,11 @@ function ListPage() {
   const handleDeleteList = async (listId, position) => {
     try {
       setIsLoading(true);
-      if (lists[position]) {
-        const newList = lists.slice(position);
-        newList.forEach(async (list) => {
-          const id = list.listId;
-          const newPosition = list.position - 1;
-          await updateData("list", id, {
-            position: newPosition,
-          });
-        });
-      }
+
+      await reducePositionOfSubsequentList(listData, position);
+
       await deleteRowFromTable("list", listId);
-      getList();
+      fetchData();
     } catch (error) {
       console.error(error.message);
     } finally {
@@ -100,7 +97,7 @@ function ListPage() {
     }
   };
 
-  async function getList() {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
       const listsArray = await getAllById(
@@ -109,18 +106,66 @@ function ListPage() {
         boardId,
         "position"
       );
-      setLists(listsArray);
+
+      const listWithCards = await Promise.all(
+        listsArray.map(async (list) => {
+          const cardsOfList = await getAllById(
+            "card",
+            "listId",
+            list.listId,
+            "position"
+          );
+          list.cards = cardsOfList;
+          return list;
+        })
+      );
+
+      setListData(listWithCards);
     } catch (error) {
       console.error("Error fetching lists:", error);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
+
+  const handleMoveCardRight = async (listPosition, cardPosition, cardId) => {
+    setIsLoading(true);
+
+    let cards = listData[listPosition - 1].cards;
+    let nextList = listData.find((list) => list.position === listPosition + 1);
+    const dataToUpdate = {
+      position: nextList.cards.length + 1,
+      listId: nextList.listId,
+    };
+    await updateData("card", cardId, dataToUpdate);
+
+    await reducePositionOfSubsequentCard(cards, cardPosition);
+
+    await fetchData();
+
+    setIsLoading(false);
+  };
+  const handleMoveCardLeft = async (listPosition, cardPosition, cardId) => {
+    setIsLoading(true);
+    let cards = listData[listPosition - 1].cards;
+    let prevList = listData.find((list) => list.position === listPosition - 1);
+    const dataToUpdate = {
+      position: prevList.cards.length + 1,
+      listId: prevList.listId,
+    };
+    await updateData("card", cardId, dataToUpdate);
+
+    await reducePositionOfSubsequentCard(cards, cardPosition);
+
+    await fetchData();
+
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    getList();
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setLists]);
+  }, [boardId, setIsLoading]);
 
   useEffect(() => {
     const getBoardDetail = async () => {
@@ -158,19 +203,18 @@ function ListPage() {
           marginTop="16px"
           alignItems={"start"}
         >
-          {lists.map((list) => (
+          {listData.map((list) => (
             <ListCard
               key={list.listId}
-              listName={list.title}
-              listId={list.listId}
-              onDeleteList={handleDeleteList}
+              list={list}
+              listsLength={listData.length}
               boardId={boardId}
-              lists={lists}
-              onGetList={getList}
-              listsLength={listsLength}
-              listPosition={list.position}
+              onFetchData={fetchData}
+              onDeleteList={handleDeleteList}
               onShiftListLeft={handleShiftListLeft}
               onShiftListRight={handleShiftListRight}
+              onMoveCardRight={handleMoveCardRight}
+              onMoveCardLeft={handleMoveCardLeft}
             />
           ))}
 

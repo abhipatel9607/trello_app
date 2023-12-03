@@ -11,18 +11,19 @@ import { Link } from "react-router-dom";
 
 // eslint-disable-next-line react/prop-types
 function Card({
-  boardId,
   listId,
   cardId,
+  boardId,
   title,
-  onDeleteCard,
   cardPosition,
   cardslength,
   listsLength,
   listPosition,
+  onDeleteCard,
   onMoveUpCard,
   onMoveDownCard,
   onMoveCardRight,
+  onMoveCardLeft,
 }) {
   const handleRedirectToEditCard = () => {
     window.location = `/editCard/${boardId}/${listId}/${cardId}`;
@@ -64,7 +65,9 @@ function Card({
               fontSize={"18px"}
               color="blue.500"
               cursor="pointer"
-              onClick={() => onMoveCardRight(listPosition, cardId)}
+              onClick={() =>
+                onMoveCardRight(listPosition, cardPosition, cardId)
+              }
             />
           </ListItem>
         )}
@@ -86,6 +89,7 @@ function Card({
               fontSize={"18px"}
               color="blue.500"
               cursor="pointer"
+              onClick={() => onMoveCardLeft(listPosition, cardPosition, cardId)}
             />
           </ListItem>
         )}

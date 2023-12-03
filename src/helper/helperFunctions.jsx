@@ -1,4 +1,5 @@
 /** @format */
+import { updateData } from "../googleSingIn/firebaseService";
 
 export const swapListData = (swapEl) => {
   let tempListId = swapEl[0].listId;
@@ -21,4 +22,34 @@ export const swapCardData = (swapEl) => {
   swapEl[1].cardId = tempCardId;
   swapEl[1].listId = tempListId;
   return swapEl;
+};
+
+export const reducePositionOfSubsequentCard = async (
+  dataList,
+  deletedDataPosition
+) => {
+  if (dataList[deletedDataPosition]) {
+    const subsequentData = dataList.slice(deletedDataPosition);
+    subsequentData.forEach(async (data) => {
+      const id = data.cardId;
+      const newPosition = data.position - 1;
+      await updateData("card", id, { position: newPosition });
+    });
+  }
+  return;
+};
+
+export const reducePositionOfSubsequentList = async (
+  dataList,
+  deletedDataPosition
+) => {
+  if (dataList[deletedDataPosition]) {
+    const subsequentData = dataList.slice(deletedDataPosition);
+    subsequentData.forEach(async (data) => {
+      const id = data.listId;
+      const newPosition = data.position - 1;
+      await updateData("list", id, { position: newPosition });
+    });
+  }
+  return;
 };
