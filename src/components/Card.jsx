@@ -1,5 +1,12 @@
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
-import { Flex, ListItem, Icon, position } from "@chakra-ui/react";
+
+import { Flex, ListItem, Icon } from "@chakra-ui/react";
 import {
   CloseIcon,
   ArrowForwardIcon,
@@ -7,9 +14,7 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
 } from "@chakra-ui/icons";
-import { Link } from "react-router-dom";
 
-// eslint-disable-next-line react/prop-types
 function Card({
   listId,
   cardId,

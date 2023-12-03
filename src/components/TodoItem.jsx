@@ -10,14 +10,17 @@ import { LoadContext } from "../helper/loderConfig";
 
 // eslint-disable-next-line react/prop-types
 function TodoItem({ isCompleted, title, todoId, getTodos }) {
+  // State for managing todo title and checkbox state
   const [todoTitle, setTodoTitle] = useState(title || "");
   const [isChecked, setIsChecked] = useState(isCompleted || false);
   const { setIsLoading } = LoadContext();
 
+  // Handler for checkbox change
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
   };
 
+  // Handler for updating todo data
   const handleUpdateTodo = async () => {
     try {
       if (!todoTitle) {
@@ -39,6 +42,7 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
     }
   };
 
+  // Handler for deleting a todo
   const handleDeleteTodo = async () => {
     try {
       setIsLoading(true);
@@ -61,12 +65,14 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
         justifyContent="space-between"
         align={"center"}
       >
+        {/* Checkbox for marking todo as completed */}
         <Checkbox
           size={"lg"}
           border={"1px solid #777"}
           isChecked={isChecked}
           onChange={handleCheckboxChange}
         ></Checkbox>
+        {/* Input field for todo title */}
         <Input
           p={1}
           width={"430px"}
@@ -78,6 +84,7 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
             textDecoration: isChecked ? "line-through" : "none",
           }}
         />
+        {/* Buttons for saving and deleting todo */}
         <Flex gap={"6px"}>
           <Button colorScheme="whatsapp" size={"xs"} onClick={handleUpdateTodo}>
             Save

@@ -42,6 +42,7 @@ function Board() {
   const { user } = UserAuth();
   const userUid = user.uid;
 
+  // Default Backgrounds URL
   const [defaultBackgrounds] = useState([
     "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     "https://images.unsplash.com/photo-1511300636408-a63a89df3482?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -51,11 +52,12 @@ function Board() {
     "https://images.unsplash.com/photo-1473654729523-203e25dfda10?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   ]);
 
-  // Functions
+  // Select a background URL for the new board
   const handleSelectBackground = (url) => {
     setBackgroundUrl(url);
   };
 
+  // Delete a board
   const handleDeleteBoard = async (boardId) => {
     try {
       setIsLoading(true);
@@ -68,11 +70,17 @@ function Board() {
     }
   };
 
+  // Get all boards for the current user
   const getBoards = async () => {
     try {
       if (userUid) {
         setIsLoading(true);
-        const boardsArray = await getAllById("board", "uid", userUid,"createdAt");
+        const boardsArray = await getAllById(
+          "board",
+          "uid",
+          userUid,
+          "createdAt"
+        );
         setBoards(boardsArray);
       }
     } catch (error) {
@@ -82,6 +90,7 @@ function Board() {
     }
   };
 
+  // Create a new board
   const handleCreateBoard = async () => {
     try {
       if (!boardTitle || !backgroundUrl) {
@@ -112,6 +121,7 @@ function Board() {
     }
   };
 
+  // Fetch boards when the component mounts or when the user changes
   useEffect(() => {
     getBoards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,7 +144,7 @@ function Board() {
               />
             ))}
 
-          {/* create a new board */}
+          {/* Create a new board */}
           <Card
             maxW="xs"
             position="relative"
@@ -190,6 +200,7 @@ function Board() {
             />
 
             <Flex wrap="wrap" gap="2">
+              {/* Render default background images */}
               {defaultBackgrounds.map((url) => (
                 <Image
                   key={url}

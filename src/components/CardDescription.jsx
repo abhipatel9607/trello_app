@@ -1,3 +1,9 @@
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 
 import {

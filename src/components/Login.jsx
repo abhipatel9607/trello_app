@@ -9,9 +9,11 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 function Login() {
+  // Get the user and googleSignIn function from the authentication context
   const { googleSingIn, user } = UserAuth();
   const navigate = useNavigate();
 
+  // Handle Google Sign In
   const handleGoogleSingin = async () => {
     try {
       await googleSingIn();
@@ -20,6 +22,7 @@ function Login() {
     }
   };
 
+  // Redirect to the board page if the user is already authenticated
   useEffect(() => {
     if (user != null) {
       navigate("/board");

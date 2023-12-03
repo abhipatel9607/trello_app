@@ -37,6 +37,7 @@ export const getAllById = async (
     }));
   } catch (error) {
     console.error(`Error getting all ${tableName}:`, error);
+    throw error;
   }
 };
 
@@ -51,6 +52,7 @@ export const createData = async (data, tableName) => {
     });
   } catch (error) {
     console.error(`Error creating ${tableName} data:`, error);
+    throw error;
   }
 };
 
@@ -61,6 +63,7 @@ export const deleteRowFromTable = async (tableName, tableId) => {
     await deleteDoc(deleteDocRef);
   } catch (error) {
     console.error(`Error deleting ${tableName} row:`, error);
+    throw error;
   }
 };
 
@@ -78,6 +81,7 @@ export const findById = async (tableName, tableId) => {
     }
   } catch (error) {
     console.error(`Error finding ${tableName} by ID:`, error);
+    throw error;
   }
 };
 
@@ -89,6 +93,7 @@ export const updateData = async (tableName, tableId, updatedData) => {
     console.log("Document successfully updated!");
   } catch (error) {
     console.error(`Error updating ${tableName} document:`, error);
+    throw error;
   }
 };
 
@@ -117,6 +122,7 @@ export const getCardAndNextCardByPosition = async (
       .filter((item) => item.listId === compareId);
   } catch (error) {
     console.error(`Error getting all ${tableName}:`, error);
+    throw error;
   }
 };
 
@@ -145,6 +151,7 @@ export const getCardAndPrevCardByPosition = async (
       .filter((item) => item.listId === compareId);
   } catch (error) {
     console.error(`Error getting all ${tableName}:`, error);
+    throw error;
   }
 };
 
@@ -173,6 +180,7 @@ export const getListAndNextListByPosition = async (
       .filter((item) => item.boardId === compareId);
   } catch (error) {
     console.error(`Error getting all ${tableName}:`, error);
+    throw error;
   }
 };
 
@@ -198,5 +206,6 @@ export const getListAndPrevListByPosition = async (
     }));
   } catch (error) {
     console.error(`Error getting all ${tableName}:`, error);
+    throw error;
   }
 };

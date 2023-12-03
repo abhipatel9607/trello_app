@@ -1,8 +1,13 @@
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 
 import { List, Flex, Image, Text, CloseButton } from "@chakra-ui/react";
 
-// eslint-disable-next-line react/prop-types
 function CommentItem({ user, commentId, commentText, onDeleteComment }) {
   return (
     <List mb={"10px"} spacing={2} position={"relative"}>

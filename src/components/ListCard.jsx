@@ -1,6 +1,10 @@
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
-import { useEffect, useState } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   Center,
   Box,
@@ -16,7 +20,6 @@ import Card from "./Card";
 import CreateNewCard from "./CreateNewCard";
 import {
   createData,
-  getAllById,
   deleteRowFromTable,
   getCardAndNextCardByPosition,
   updateData,
@@ -26,8 +29,9 @@ import {
   reducePositionOfSubsequentCard,
   swapCardData,
 } from "../helper/helperFunctions";
+import { useState } from "react";
+import { ChevronRightIcon, ChevronLeftIcon } from "@chakra-ui/icons";
 
-// eslint-disable-next-line react/prop-types
 function ListCard({
   list,
   listsLength,
@@ -43,40 +47,56 @@ function ListCard({
   const { setIsLoading } = LoadContext();
   const cards = list.cards;
 
+  // Move card up within the list
   const handleMoveUpCard = async (position) => {
-    const swapEl = await getCardAndPrevCardByPosition(
-      "card",
-      "position",
-      position,
-      "position",
-      list.listId
-    );
-    swapCardData(swapEl);
-    swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
-    onFetchData();
+    try {
+      setIsLoading(true);
+      const swapEl = await getCardAndPrevCardByPosition(
+        "card",
+        "position",
+        position,
+        "position",
+        list.listId
+      );
+      swapCardData(swapEl);
+      swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
+      onFetchData();
+    } catch (error) {
+      console.error("Error moving card up:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Move card down within the list
   const handleMoveDownCard = async (position) => {
-    const swapEl = await getCardAndNextCardByPosition(
-      "card",
-      "position",
-      position,
-      "position",
-      list.listId
-    );
-    console.log(swapEl);
-    swapCardData(swapEl);
-    swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
-    onFetchData();
+    try {
+      setIsLoading(true);
+      const swapEl = await getCardAndNextCardByPosition(
+        "card",
+        "position",
+        position,
+        "position",
+        list.listId
+      );
+      swapCardData(swapEl);
+      swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
+      onFetchData();
+    } catch (error) {
+      console.error("Error moving card down:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Create a new card within the list
   const handleCreateCard = async () => {
     try {
+      setIsLoading(true);
       if (!newCardTitle) {
         alert("Card title required.");
         return;
       }
-      setIsLoading(true);
       const cardData = {
         listId: list.listId,
         title: newCardTitle,
@@ -84,16 +104,16 @@ function ListCard({
         position: cards.length + 1,
       };
       await createData(cardData, "card");
-
       onFetchData();
       setNewCardTitle("");
     } catch (error) {
-      console.error(error.message);
+      console.error("Error creating card:", error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Delete a card from the list
   const handleDeleteCard = async (cardId, position) => {
     try {
       setIsLoading(true);
@@ -101,7 +121,7 @@ function ListCard({
       await deleteRowFromTable("card", cardId);
       onFetchData();
     } catch (error) {
-      console.error(error.message);
+      console.error("Error deleting card:", error.message);
     } finally {
       setIsLoading(false);
     }
@@ -137,8 +157,8 @@ function ListCard({
             align={"center"}
             justify={"center"}
             color={useColorModeValue("gray.800", "white")}
-            pt={6}
-            pb={6}
+            pt={2}
+            pb={1}
           >
             {list.position !== 1 && (
               <Icon
@@ -151,9 +171,12 @@ function ListCard({
             )}
 
             <Text
+              textAlign={"center"}
               color={"gray.800"}
               wordBreak={"break-word"}
               fontWeight={"bolder"}
+              width={"60%"}
+              p={2}
             >
               {list.title}
             </Text>
