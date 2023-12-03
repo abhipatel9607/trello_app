@@ -8,11 +8,11 @@
 
 import { Flex, ListItem, Icon } from "@chakra-ui/react";
 import {
-  CloseIcon,
   ArrowForwardIcon,
   ArrowBackIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  DeleteIcon,
 } from "@chakra-ui/icons";
 
 function Card({
@@ -100,9 +100,9 @@ function Card({
         )}
         <ListItem>
           <Icon
-            as={CloseIcon}
+            as={DeleteIcon}
             ml={1}
-            fontSize={"12px"}
+            fontSize={"14px"}
             color="blue.500"
             cursor="pointer"
             onClick={() => onDeleteCard(cardId, cardPosition)}
