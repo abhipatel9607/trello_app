@@ -4,12 +4,7 @@ import { useEffect, useState } from "react";
 import SectionHeader from "./SectionHeader";
 import { UserAuth } from "../googleSingIn/AuthContext";
 import BoardCard from "./BoardCard";
-import { LoadContext } from "../helper/loderConfig";
-import {
-  getAllById,
-  createData,
-  deleteRowFromTable,
-} from "../googleSingIn/firebaseService";
+import { getAllById, createData } from "../googleSingIn/firebaseService";
 import {
   Container,
   Flex,
@@ -17,6 +12,7 @@ import {
   CardBody,
   Stack,
   Image,
+  Box,
   Heading,
   Divider,
   Button,
@@ -30,13 +26,15 @@ import {
   ModalFooter,
   Input,
 } from "@chakra-ui/react";
+import Loader from "./Loader";
 
 function Board() {
   const [boards, setBoards] = useState(null);
   const [boardTitle, setBoardTitle] = useState("");
   const [backgroundUrl, setBackgroundUrl] = useState("");
-
-  const { setIsLoading } = LoadContext();
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingBoardData, setIsLoadingBoardData] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { user } = UserAuth();
@@ -57,24 +55,16 @@ function Board() {
     setBackgroundUrl(url);
   };
 
-  // Delete a board
-  const handleDeleteBoard = async (boardId) => {
-    try {
-      setIsLoading(true);
-      await deleteRowFromTable("board", boardId);
-      await getBoards();
-    } catch (error) {
-      console.error("Error deleting board:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  // Clear ErrorMessage State
+  const clearErrorMessage = () => {
+    setErrorMessage(null);
   };
 
   // Get all boards for the current user
   const getBoards = async () => {
     try {
       if (userUid) {
-        setIsLoading(true);
+        setIsLoadingBoardData(true);
         const boardsArray = await getAllById(
           "board",
           "uid",
@@ -86,19 +76,23 @@ function Board() {
     } catch (error) {
       console.error("Error getting boards:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingBoardData(false);
     }
   };
 
   // Create a new board
   const handleCreateBoard = async () => {
     try {
-      if (!boardTitle || !backgroundUrl) {
-        alert("Board title and background URL are required.");
+      if (!navigator.onLine) {
+        setErrorMessage(
+          "You are currently offline. Please check your network connection."
+        );
         return;
       }
-
-      onClose();
+      if (!boardTitle || !backgroundUrl) {
+        setErrorMessage("Board title and background URL are required.");
+        return;
+      }
       setIsLoading(true);
 
       const boardData = {
@@ -106,7 +100,7 @@ function Board() {
         bgImg: backgroundUrl,
         uid: userUid,
       };
-
+      
       if (userUid) {
         await createData(boardData, "board");
       }
@@ -114,8 +108,11 @@ function Board() {
       await getBoards();
       setBoardTitle("");
       setBackgroundUrl("");
+      clearErrorMessage();
+      onClose();
     } catch (error) {
       console.error("Error creating board:", error);
+      setErrorMessage("An error occurred. Please try again."); // Set error message on failure
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +126,7 @@ function Board() {
 
   return (
     <Container maxW="8xl" bg="blue.600" minH="100vh" centerContent>
+      {isLoadingBoardData && <Loader />}
       <Container p="8" bg="blue.600" color="black" maxW="7xl">
         <SectionHeader text="Your Boards" />
         <Flex gap="4" wrap="wrap" marginTop="16px">
@@ -140,7 +138,7 @@ function Board() {
                 title={board.title}
                 bgImg={board.bgImg}
                 boardId={board.boardId}
-                onDeleteBoard={handleDeleteBoard}
+                onGetBoards={getBoards}
               />
             ))}
 
@@ -184,6 +182,7 @@ function Board() {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
+          {isLoading && <Loader />}
           <ModalHeader>Add New Board</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -224,8 +223,9 @@ function Board() {
             </Flex>
           </ModalBody>
           <ModalFooter>
+            {errorMessage && <Box color="red.500">{errorMessage}</Box>}
             <Button colorScheme="blue" mr={3} onClick={handleCreateBoard}>
-              Save
+              Create
             </Button>
             <Button onClick={onClose}>Cancel</Button>
           </ModalFooter>

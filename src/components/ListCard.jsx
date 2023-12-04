@@ -1,10 +1,6 @@
-/**
- * eslint-disable react/prop-types
- *
- * @format
- */
-
+/* eslint-disable react/prop-types */
 /** @format */
+
 import {
   Center,
   Box,
@@ -15,75 +11,45 @@ import {
   List,
   CloseButton,
 } from "@chakra-ui/react";
-import { LoadContext } from "../helper/loderConfig";
 import Card from "./Card";
 import CreateNewCard from "./CreateNewCard";
 import {
   createData,
   deleteRowFromTable,
-  getCardAndNextCardByPosition,
   updateData,
-  getCardAndPrevCardByPosition,
+  getListAndPrevListByPosition,
+  getListAndNextListByPosition,
 } from "../googleSingIn/firebaseService";
 import {
-  reducePositionOfSubsequentCard,
-  swapCardData,
+  reducePositionOfSubsequentList,
+  swapListData,
 } from "../helper/helperFunctions";
 import { useState } from "react";
 import { ChevronRightIcon, ChevronLeftIcon } from "@chakra-ui/icons";
+import Loader from "./Loader";
 
-function ListCard({
-  list,
-  listsLength,
-  boardId,
-  onFetchData,
-  onDeleteList,
-  onShiftListLeft,
-  onShiftListRight,
-  onMoveCardRight,
-  onMoveCardLeft,
-}) {
+function ListCard({ list, listsLength, boardId, listData, onFetchData }) {
   const [newCardTitle, setNewCardTitle] = useState("");
-  const { setIsLoading } = LoadContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreateNewCardLoading, setIsCreateNewCardLoading] = useState(false);
+
   const cards = list.cards;
 
-  // Move card up within the list
-  const handleMoveUpCard = async (position) => {
+  // Delete a list
+  const handleDeleteList = async (listId, position) => {
     try {
       setIsLoading(true);
-      const swapEl = await getCardAndPrevCardByPosition(
-        "card",
-        "position",
-        position,
-        "position",
-        list.listId
-      );
-      swapCardData(swapEl);
-      swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
-      onFetchData();
-    } catch (error) {
-      console.error("Error moving card up:", error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  // Move card down within the list
-  const handleMoveDownCard = async (position) => {
-    try {
-      setIsLoading(true);
-      const swapEl = await getCardAndNextCardByPosition(
-        "card",
-        "position",
-        position,
-        "position",
-        list.listId
-      );
-      swapCardData(swapEl);
-      swapEl.forEach(async (el) => await updateData("card", el.cardId, el));
-      onFetchData();
+      // Update positions of subsequent lists
+      await reducePositionOfSubsequentList(listData, position);
+
+      // Delete the list
+      await deleteRowFromTable("list", listId);
+
+      // Fetch updated data
+      await onFetchData();
     } catch (error) {
-      console.error("Error moving card down:", error.message);
+      console.error("Error deleting list:", error);
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +58,7 @@ function ListCard({
   // Create a new card within the list
   const handleCreateCard = async () => {
     try {
-      setIsLoading(true);
+      setIsCreateNewCardLoading(true);
       if (!newCardTitle) {
         alert("Card title required.");
         return;
@@ -104,24 +70,64 @@ function ListCard({
         position: cards.length + 1,
       };
       await createData(cardData, "card");
-      onFetchData();
+      await onFetchData();
       setNewCardTitle("");
     } catch (error) {
       console.error("Error creating card:", error.message);
+    } finally {
+      setIsCreateNewCardLoading(false);
+    }
+  };
+
+  // Shift list to the left
+  const handleShiftListLeft = async (position) => {
+    try {
+      setIsLoading(true);
+
+      // Get the previous list for swapping
+      const swapEl = await getListAndPrevListByPosition(
+        "list",
+        "position",
+        position,
+        "position"
+      );
+      const swapData = swapEl.filter((el) => el.boardId === boardId);
+
+      // Swap list positions
+      const swapedData = swapListData(swapData);
+      swapedData.forEach(async (el) => await updateData("list", el.listId, el));
+
+      // Fetch updated data
+      await onFetchData();
+    } catch (error) {
+      console.error("Error shifting list left:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Delete a card from the list
-  const handleDeleteCard = async (cardId, position) => {
+  // Shift list to the right
+  const handleShiftListRight = async (position) => {
     try {
       setIsLoading(true);
-      await reducePositionOfSubsequentCard(cards, position);
-      await deleteRowFromTable("card", cardId);
-      onFetchData();
+
+      // Get the next list for swapping
+      const swapEl = await getListAndNextListByPosition(
+        "list",
+        "position",
+        position,
+        "position",
+        boardId
+      );
+
+      // Swap list positions
+      swapListData(swapEl);
+      swapEl.forEach(async (el) => await updateData("list", el.listId, el));
+
+      // Fetch updated data
+      await onFetchData();
     } catch (error) {
-      console.error("Error deleting card:", error.message);
+      console.error("Error shifting list right:", error);
     } finally {
       setIsLoading(false);
     }
@@ -140,6 +146,7 @@ function ListCard({
           bgColor={"#ccc"}
           position={"relative"}
         >
+          {isLoading && <Loader />}
           <CloseButton
             position="absolute"
             top="0"
@@ -149,7 +156,7 @@ function ListCard({
             height="20px"
             zIndex="10"
             onClick={() => {
-              onDeleteList(list.listId, list.position);
+              handleDeleteList(list.listId, list.position);
             }}
           />
 
@@ -166,7 +173,7 @@ function ListCard({
                 fontSize={"24px"}
                 color="blue.500"
                 cursor="pointer"
-                onClick={() => onShiftListLeft(list.position)}
+                onClick={() => handleShiftListLeft(list.position)}
               />
             )}
 
@@ -186,7 +193,7 @@ function ListCard({
                 fontSize={"24px"}
                 color="blue.500"
                 cursor="pointer"
-                onClick={() => onShiftListRight(list.position)}
+                onClick={() => handleShiftListRight(list.position)}
               />
             )}
           </Flex>
@@ -202,23 +209,23 @@ function ListCard({
                 cards.map((card) => (
                   <Card
                     key={card.cardId}
+                    cards={cards}
+                    list={list}
                     listId={list.listId}
                     cardId={card.cardId}
                     boardId={boardId}
                     title={card.title}
+                    listData={listData}
+                    onFetchData={onFetchData}
                     cardPosition={card.position}
                     cardslength={cards.length}
                     listsLength={listsLength}
                     listPosition={list.position}
-                    onDeleteCard={handleDeleteCard}
-                    onMoveUpCard={handleMoveUpCard}
-                    onMoveDownCard={handleMoveDownCard}
-                    onMoveCardRight={onMoveCardRight}
-                    onMoveCardLeft={onMoveCardLeft}
                   />
                 ))}
 
               <CreateNewCard
+                isCreateNewCardLoading={isCreateNewCardLoading}
                 newCardTitle={newCardTitle}
                 setNewCardTitle={setNewCardTitle}
                 onCreateCard={handleCreateCard}

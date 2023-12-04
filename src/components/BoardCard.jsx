@@ -9,12 +9,31 @@ import {
 } from "@chakra-ui/react";
 import { CloseButton } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import Loader from "./Loader";
+import { useState } from "react";
+import { deleteRowFromTable } from "../googleSingIn/firebaseService";
 
 // eslint-disable-next-line react/prop-types
-function BoardCard({ title, bgImg, boardId, onDeleteBoard }) {
+function BoardCard({ title, bgImg, boardId, onGetBoards }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Delete a board
+  const handleDeleteBoard = async (boardId) => {
+    try {
+      setIsLoading(true);
+      await deleteRowFromTable("board", boardId);
+      await onGetBoards();
+    } catch (error) {
+      console.error("Error deleting board:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div>
       <Card maxW="xs" position="relative" height="150px" cursor="pointer">
+        {isLoading && <Loader />}
         <CloseButton
           position="absolute"
           top="1"
@@ -25,7 +44,7 @@ function BoardCard({ title, bgImg, boardId, onDeleteBoard }) {
           bgColor="#aaa"
           zIndex="10"
           onClick={() => {
-            onDeleteBoard(boardId);
+            handleDeleteBoard(boardId);
           }}
         />
         <Link to={`/board/${boardId}`}>

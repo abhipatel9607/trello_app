@@ -1,8 +1,19 @@
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 import { List, Flex, Input, Button } from "@chakra-ui/react";
+import LoaderSmall from "./LoaderSamll";
 
-// eslint-disable-next-line react/prop-types
-function CreateNewTodo({ newTodo, setNewTodo, onCreateNewTodo }) {
+function CreateNewTodo({
+  isLoadingNewTodo,
+  newTodo,
+  setNewTodo,
+  onCreateNewTodo,
+}) {
   return (
     <List mb={"10px"} spacing={2}>
       <Flex
@@ -13,6 +24,8 @@ function CreateNewTodo({ newTodo, setNewTodo, onCreateNewTodo }) {
         direction={"column"}
         align={"start"}
         gap={2}
+        position={"relative"}
+        overflow={"hidden"}
       >
         <Input
           p={1}
@@ -22,8 +35,15 @@ function CreateNewTodo({ newTodo, setNewTodo, onCreateNewTodo }) {
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
         />
-        <Button colorScheme="telegram" size={"xs"} onClick={onCreateNewTodo}>
+        <Button
+          colorScheme="telegram"
+          size={"xs"}
+          onClick={onCreateNewTodo}
+          position={"relative"}
+          overflow={"hidden"}
+        >
           Create New Todo
+          {isLoadingNewTodo && <LoaderSmall />}
         </Button>
       </Flex>
     </List>

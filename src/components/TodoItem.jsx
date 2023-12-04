@@ -6,14 +6,15 @@ import {
   updateData,
   deleteRowFromTable,
 } from "../googleSingIn/firebaseService";
-import { LoadContext } from "../helper/loderConfig";
+import LoaderSmall from "./LoaderSamll";
 
 // eslint-disable-next-line react/prop-types
 function TodoItem({ isCompleted, title, todoId, getTodos }) {
   // State for managing todo title and checkbox state
   const [todoTitle, setTodoTitle] = useState(title || "");
   const [isChecked, setIsChecked] = useState(isCompleted || false);
-  const { setIsLoading } = LoadContext();
+  const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
 
   // Handler for checkbox change
   const handleCheckboxChange = () => {
@@ -27,7 +28,7 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
         alert("Todo title is a required field");
         return;
       }
-      setIsLoading(true);
+      setIsLoadingUpdate(true);
       const updatedData = {
         title: todoTitle,
         isCompleted: isChecked,
@@ -38,20 +39,20 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
     } catch (error) {
       console.error("Error updating todo data:", error.message);
     } finally {
-      setIsLoading(false);
+      setIsLoadingUpdate(false);
     }
   };
 
   // Handler for deleting a todo
   const handleDeleteTodo = async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingDelete(true);
       await deleteRowFromTable("todo", todoId);
       getTodos();
     } catch (error) {
       console.error("Error deleting todo:", error.message);
     } finally {
-      setIsLoading(false);
+      setIsLoadingDelete(false);
     }
   };
 
@@ -86,11 +87,25 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
         />
         {/* Buttons for saving and deleting todo */}
         <Flex gap={"6px"}>
-          <Button colorScheme="whatsapp" size={"xs"} onClick={handleUpdateTodo}>
+          <Button
+            colorScheme="whatsapp"
+            size={"xs"}
+            onClick={handleUpdateTodo}
+            position={"relative"}
+            overflow={"hidden"}
+          >
             Save
+            {isLoadingUpdate && <LoaderSmall />}
           </Button>
-          <Button colorScheme="red" size={"xs"} onClick={handleDeleteTodo}>
+          <Button
+            colorScheme="red"
+            size={"xs"}
+            onClick={handleDeleteTodo}
+            position={"relative"}
+            overflow={"hidden"}
+          >
             Delete
+            {isLoadingDelete && <LoaderSmall />}
           </Button>
         </Flex>
       </Flex>

@@ -1,8 +1,19 @@
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 import { List, Flex, Input, Button } from "@chakra-ui/react";
+import LoaderSmall from "./LoaderSamll";
 
-// eslint-disable-next-line react/prop-types
-function CreateNewComment({ newComment, setNewComment, onCreateNewComment }) {
+function CreateNewComment({
+  newComment,
+  setNewComment,
+  onCreateNewComment,
+  isCreateNewCommentLoading,
+}) {
   return (
     <List mb={"10px"} spacing={2}>
       <Flex
@@ -23,7 +34,14 @@ function CreateNewComment({ newComment, setNewComment, onCreateNewComment }) {
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
         />
-        <Button colorScheme="telegram" size={"xs"} onClick={onCreateNewComment}>
+        <Button
+          colorScheme="telegram"
+          size={"xs"}
+          onClick={onCreateNewComment}
+          position={"relative"}
+          overflow={"hidden"}
+        >
+          {isCreateNewCommentLoading && <LoaderSmall />}
           Add Comment
         </Button>
       </Flex>

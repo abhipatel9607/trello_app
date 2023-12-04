@@ -18,13 +18,10 @@ import CreateNewComment from "./CreateNewComment";
 import CommentItem from "./CommentItem";
 import {
   createData,
-  deleteRowFromTable,
   findById,
   getAllById,
-  updateData,
 } from "../googleSingIn/firebaseService";
 import { UserAuth } from "../googleSingIn/AuthContext";
-import { LoadContext } from "../helper/loderConfig";
 
 function EditCard() {
   const { user } = UserAuth();
@@ -38,7 +35,9 @@ function EditCard() {
   const [cardDescription, setCardDescription] = useState("");
   const [newTodo, setNewTodo] = useState("");
   const [newComment, setNewComment] = useState("");
-  const { setIsLoading } = LoadContext();
+  const [isLoadingNewTodo, setIsLoadingNewTodo] = useState(false);
+  const [isLoadingNewComment, setIsLoadingNewComment] = useState(false);
+
   console.log(todoData);
 
   // Function
@@ -49,7 +48,7 @@ function EditCard() {
         return;
       }
 
-      setIsLoading(true);
+      setIsLoadingNewTodo(true);
 
       const data = {
         cardId: cardId,
@@ -63,80 +62,45 @@ function EditCard() {
     } catch (error) {
       console.error(error.message);
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUpdateCardData = async () => {
-    try {
-      if (!cardTitle || !cardDescription) {
-        alert("Card title and description are required.");
-        return;
-      }
-
-      setIsLoading(true);
-
-      const updatedData = {
-        title: cardTitle,
-        description: cardDescription,
-      };
-
-      await updateData("card", cardId, updatedData);
-      console.log("Card updated successfully!");
-    } catch (error) {
-      console.error("Error updating card data:", error.message);
-    } finally {
-      setIsLoading(false);
+      setIsLoadingNewTodo(false);
     }
   };
 
   const getBoards = async () => {
     try {
-      setIsLoading(true);
       const data = await findById("board", boardId);
       setBoardData(data);
     } catch (error) {
       console.error("Error fetching board details:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const getCards = async () => {
     try {
-      setIsLoading(true);
       const data = await findById("card", cardId);
       setCardData(data);
       setCardTitle(data.title);
       setCardDescription(data.description);
     } catch (error) {
       console.error("Error fetching card details:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const getTodos = async () => {
     try {
-      setIsLoading(true);
       const data = await getAllById("todo", "cardId", cardId, "createdAt");
       setTodoData(data);
     } catch (error) {
       console.error("Error fetching board details:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const getComments = async () => {
     try {
-      setIsLoading(true);
       const data = await getAllById("comment", "cardId", cardId, "createdAt");
       setCommentData(data);
     } catch (error) {
       console.error("Error fetching board details:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -147,7 +111,7 @@ function EditCard() {
         return;
       }
 
-      setIsLoading(true);
+      setIsLoadingNewComment(true);
 
       const data = {
         cardId: cardId,
@@ -161,19 +125,7 @@ function EditCard() {
     } catch (error) {
       console.error(error.message);
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    try {
-      setIsLoading(true);
-      await deleteRowFromTable("comment", commentId);
-      await getComments();
-    } catch (error) {
-      console.error(error.message);
-    } finally {
-      setIsLoading(false);
+      setIsLoadingNewComment(false);
     }
   };
 
@@ -207,11 +159,11 @@ function EditCard() {
           <GoBackBtn />
         </Link>
         <CardDescription
+          cardId={cardId}
           cardTitle={cardTitle}
           setCardTitle={setCardTitle}
           cardDescription={cardDescription}
           setCardDescription={setCardDescription}
-          onUpdateCardData={handleUpdateCardData}
         />
 
         {/* TODO SECTION  */}
@@ -250,6 +202,7 @@ function EditCard() {
 
               {/* CREATE NEW TODO */}
               <CreateNewTodo
+                isLoadingNewTodo={isLoadingNewTodo}
                 newTodo={newTodo}
                 setNewTodo={setNewTodo}
                 onCreateNewTodo={handleCreateNewTodo}
@@ -288,12 +241,13 @@ function EditCard() {
                     user={user}
                     commentId={comment.commentId}
                     commentText={comment.commentText}
-                    onDeleteComment={handleDeleteComment}
+                    onGetComments={getComments}
                   />
                 ))}
 
               {/* Add Comment */}
               <CreateNewComment
+                isCreateNewCommentLoading={isLoadingNewComment}
                 onCreateNewComment={handleCreateNewComment}
                 newComment={newComment}
                 setNewComment={setNewComment}

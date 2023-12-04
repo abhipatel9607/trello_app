@@ -1,3 +1,9 @@
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 import {
   Center,
@@ -6,9 +12,14 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
+import Loader from "./Loader";
 
-// eslint-disable-next-line react/prop-types
-function CreateNewList({ newListTitle, setNewListTitle, onCreateList }) {
+function CreateNewList({
+  isLoading,
+  newListTitle,
+  setNewListTitle,
+  onCreateList,
+}) {
   return (
     <Center flexShrink={0} alignItems={"start"} py={6} width={"260px"}>
       <Box
@@ -22,9 +33,11 @@ function CreateNewList({ newListTitle, setNewListTitle, onCreateList }) {
         <Box
           bg={useColorModeValue("gray.50", "gray.900")}
           bgColor={"#ccc"}
+          position={"relative"}
           px={2}
           py={2}
         >
+          {isLoading && <Loader />}
           <Input
             isInvalid
             errorBorderColor="blue.300"

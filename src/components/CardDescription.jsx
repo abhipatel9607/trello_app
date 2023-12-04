@@ -1,9 +1,4 @@
-/**
- * eslint-disable react/prop-types
- *
- * @format
- */
-
+/* eslint-disable react/prop-types */
 /** @format */
 
 import {
@@ -15,14 +10,42 @@ import {
   Button,
   Flex,
 } from "@chakra-ui/react";
+import { updateData } from "../googleSingIn/firebaseService";
+import { useState } from "react";
+import LoaderSmall from "./LoaderSamll";
 
 function CardDescription({
+  cardId,
   cardTitle,
   setCardTitle,
   cardDescription,
   setCardDescription,
-  onUpdateCardData,
 }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleUpdateCardData = async () => {
+    try {
+      if (!cardTitle || !cardDescription) {
+        alert("Card title and description are required.");
+        return;
+      }
+
+      setIsLoading(true);
+
+      const updatedData = {
+        title: cardTitle,
+        description: cardDescription,
+      };
+
+      await updateData("card", cardId, updatedData);
+      console.log("Card updated successfully!");
+    } catch (error) {
+      console.error("Error updating card data:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Container px={0} py={8} maxW="8xl">
       <Flex direction="column" gap={"10px"}>
@@ -67,9 +90,12 @@ function CardDescription({
           width={"fit-content"}
           size={"xs"}
           colorScheme="blue"
-          onClick={onUpdateCardData}
+          onClick={handleUpdateCardData}
+          position={"relative"}
+          overflow={"hidden"}
         >
           Save
+          {isLoading && <LoaderSmall />}
         </Button>
 
         <Flex align={"center"}></Flex>

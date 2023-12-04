@@ -7,82 +7,18 @@ import ListCard from "./ListCard";
 import CreateNewList from "./CreateNewList";
 import {
   createData,
-  deleteRowFromTable,
   findById,
   getAllById,
-  updateData,
-  getListAndNextListByPosition,
-  getListAndPrevListByPosition,
 } from "../googleSingIn/firebaseService";
-import { LoadContext } from "../helper/loderConfig";
-import {
-  reducePositionOfSubsequentCard,
-  reducePositionOfSubsequentList,
-  swapListData,
-} from "../helper/helperFunctions";
+import Loader from "./Loader";
 
 function ListPage() {
   const { boardId } = useParams();
   const [boardData, setBoardData] = useState(null);
   const [newListTitle, setNewListTitle] = useState("");
-  const { setIsLoading } = LoadContext();
-
   const [listData, setListData] = useState([]);
-  console.log(listData);
-
-  // Shift list to the left
-  const handleShiftListLeft = async (position) => {
-    try {
-      setIsLoading(true);
-
-      // Get the previous list for swapping
-      const swapEl = await getListAndPrevListByPosition(
-        "list",
-        "position",
-        position,
-        "position"
-      );
-      const swapData = swapEl.filter((el) => el.boardId === boardId);
-
-      // Swap list positions
-      const swapedData = swapListData(swapData);
-      swapedData.forEach(async (el) => await updateData("list", el.listId, el));
-
-      // Fetch updated data
-      await fetchData();
-    } catch (error) {
-      console.error("Error shifting list left:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Shift list to the right
-  const handleShiftListRight = async (position) => {
-    try {
-      setIsLoading(true);
-
-      // Get the next list for swapping
-      const swapEl = await getListAndNextListByPosition(
-        "list",
-        "position",
-        position,
-        "position",
-        boardId
-      );
-
-      // Swap list positions
-      swapListData(swapEl);
-      swapEl.forEach(async (el) => await updateData("list", el.listId, el));
-
-      // Fetch updated data
-      await fetchData();
-    } catch (error) {
-      console.error("Error shifting list right:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingBoardData, setIsLoadingBoardData] = useState(false);
 
   // Create a new list
   const handleCreateList = async () => {
@@ -115,30 +51,8 @@ function ListPage() {
     }
   };
 
-  // Delete a list
-  const handleDeleteList = async (listId, position) => {
-    try {
-      setIsLoading(true);
-
-      // Update positions of subsequent lists
-      await reducePositionOfSubsequentList(listData, position);
-
-      // Delete the list
-      await deleteRowFromTable("list", listId);
-
-      // Fetch updated data
-      fetchData();
-    } catch (error) {
-      console.error("Error deleting list:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const fetchData = async () => {
     try {
-      setIsLoading(true);
-
       // Fetch all lists for the current board
       const listsArray = await getAllById(
         "list",
@@ -165,74 +79,6 @@ function ListPage() {
       setListData(listWithCards);
     } catch (error) {
       console.error("Error fetching lists:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleMoveCardRight = async (listPosition, cardPosition, cardId) => {
-    try {
-      setIsLoading(true);
-
-      // Get the cards of the current list
-      let cards = listData[listPosition - 1].cards;
-
-      // Find the next list
-      let nextList = listData.find(
-        (list) => list.position === listPosition + 1
-      );
-
-      // Prepare data to update the card
-      const dataToUpdate = {
-        position: nextList.cards.length + 1,
-        listId: nextList.listId,
-      };
-
-      // Update the card position and listId
-      await updateData("card", cardId, dataToUpdate);
-
-      // Reduce the position of subsequent cards in the current list
-      await reducePositionOfSubsequentCard(cards, cardPosition);
-
-      // Fetch updated data
-      await fetchData();
-    } catch (error) {
-      console.error("Error moving card right:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleMoveCardLeft = async (listPosition, cardPosition, cardId) => {
-    try {
-      setIsLoading(true);
-
-      // Get the cards of the current list
-      let cards = listData[listPosition - 1].cards;
-
-      // Find the previous list
-      let prevList = listData.find(
-        (list) => list.position === listPosition - 1
-      );
-
-      // Prepare data to update the card
-      const dataToUpdate = {
-        position: prevList.cards.length + 1,
-        listId: prevList.listId,
-      };
-
-      // Update the card position and listId
-      await updateData("card", cardId, dataToUpdate);
-
-      // Reduce the position of subsequent cards in the current list
-      await reducePositionOfSubsequentCard(cards, cardPosition);
-
-      // Fetch updated data
-      await fetchData();
-    } catch (error) {
-      console.error("Error moving card left:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -240,19 +86,20 @@ function ListPage() {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boardId, setIsLoading]);
+  }, [boardId]);
 
+  
   // Fetch board details
   useEffect(() => {
     const getBoardDetail = async () => {
       try {
-        setIsLoading(true);
+        setIsLoadingBoardData(true);
         const data = await findById("board", boardId);
         setBoardData(data);
       } catch (error) {
         console.error("Error fetching board details:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingBoardData(false);
       }
     };
 
@@ -269,7 +116,9 @@ function ListPage() {
       minH="100vh"
       width={"100vw"}
       centerContent
+      position={"relative"}
     >
+      {isLoadingBoardData && <Loader />}
       <Container p="8" pl={4} color="black" width={"100vw"} maxW="7xl">
         <SectionHeader text={boardData ? boardData.title : "Loading..."} />
         <Flex
@@ -285,16 +134,13 @@ function ListPage() {
               list={list}
               listsLength={listData.length}
               boardId={boardId}
+              listData={listData}
               onFetchData={fetchData}
-              onDeleteList={handleDeleteList}
-              onShiftListLeft={handleShiftListLeft}
-              onShiftListRight={handleShiftListRight}
-              onMoveCardRight={handleMoveCardRight}
-              onMoveCardLeft={handleMoveCardLeft}
             />
           ))}
 
           <CreateNewList
+            isLoading={isLoading}
             newListTitle={newListTitle}
             setNewListTitle={setNewListTitle}
             onCreateList={handleCreateList}

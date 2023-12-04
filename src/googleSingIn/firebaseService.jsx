@@ -52,7 +52,7 @@ export const createData = async (data, tableName) => {
     });
   } catch (error) {
     console.error(`Error creating ${tableName} data:`, error);
-    throw error;
+    return error;
   }
 };
 
