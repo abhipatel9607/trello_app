@@ -1,4 +1,9 @@
-/* eslint-disable react/prop-types */
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 
 import { Flex, ListItem, Icon } from "@chakra-ui/react";
@@ -21,6 +26,7 @@ import {
   getCardAndPrevCardByPosition,
   updateData,
 } from "../googleSingIn/firebaseService";
+import { Link } from "react-router-dom";
 
 function Card({
   listId,
@@ -94,9 +100,9 @@ function Card({
     }
   };
 
-  const handleRedirectToEditCard = () => {
-    window.location = `/editCard/${boardId}/${listId}/${cardId}`;
-  };
+  // const handleRedirectToEditCard = () => {
+  //   window.location = `/editCard/${boardId}/${listId}/${cardId}`;
+  // };
 
   const handleMoveCardRight = async (listPosition, cardPosition, cardId) => {
     try {
@@ -177,13 +183,9 @@ function Card({
       overflow={"hidden"}
     >
       {isLoading && <Loader />}
-      <ListItem
-        onClick={handleRedirectToEditCard}
-        wordBreak={"break-word"}
-        width={"80%"}
-      >
-        {title}
-      </ListItem>
+      <Link to={`/editCard/${boardId}/${listId}/${cardId}`}>
+        <ListItem wordBreak={"break-word"}>{title}</ListItem>
+      </Link>
       <Flex>
         {cardPosition !== 1 && (
           <ListItem>
