@@ -38,8 +38,6 @@ function EditCard() {
   const [isLoadingNewTodo, setIsLoadingNewTodo] = useState(false);
   const [isLoadingNewComment, setIsLoadingNewComment] = useState(false);
 
-  console.log(todoData);
-
   // Function
   const handleCreateNewTodo = async () => {
     try {
