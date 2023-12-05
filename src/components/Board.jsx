@@ -100,7 +100,7 @@ function Board() {
         bgImg: backgroundUrl,
         uid: userUid,
       };
-      
+
       if (userUid) {
         await createData(boardData, "board");
       }
@@ -127,7 +127,7 @@ function Board() {
   return (
     <Container maxW="8xl" bg="blue.600" minH="100vh" centerContent>
       {isLoadingBoardData && <Loader />}
-      <Container p="8" bg="blue.600" color="black" maxW="7xl">
+      <Container bg="blue.600" color="black" maxW="7xl">
         <SectionHeader text="Your Boards" />
         <Flex gap="4" wrap="wrap" marginTop="16px">
           {/* Render Boards */}

@@ -76,7 +76,6 @@ export const findById = async (tableName, tableId) => {
     if (docSnapshot.exists()) {
       return docSnapshot.data();
     } else {
-      console.log("Document does not exist");
       return null;
     }
   } catch (error) {
@@ -90,7 +89,6 @@ export const updateData = async (tableName, tableId, updatedData) => {
   try {
     const docRef = doc(db, tableName, tableId);
     await updateDoc(docRef, { ...updatedData, editedAt: serverTimestamp() });
-    console.log("Document successfully updated!");
   } catch (error) {
     console.error(`Error updating ${tableName} document:`, error);
     throw error;

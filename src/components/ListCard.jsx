@@ -1,4 +1,9 @@
-/* eslint-disable react/prop-types */
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 
 import {
@@ -9,7 +14,6 @@ import {
   Icon,
   Text,
   List,
-  CloseButton,
 } from "@chakra-ui/react";
 import Card from "./Card";
 import CreateNewCard from "./CreateNewCard";
@@ -25,7 +29,11 @@ import {
   swapListData,
 } from "../helper/helperFunctions";
 import { useState } from "react";
-import { ChevronRightIcon, ChevronLeftIcon } from "@chakra-ui/icons";
+import {
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  DeleteIcon,
+} from "@chakra-ui/icons";
 import Loader from "./Loader";
 
 function ListCard({ list, listsLength, boardId, listData, onFetchData }) {
@@ -135,7 +143,7 @@ function ListCard({ list, listsLength, boardId, listData, onFetchData }) {
 
   return (
     <>
-      <Center flexShrink={0} py={6} width={"260px"}>
+      <Center flexShrink={0} width={"260px"}>
         <Box
           maxW={"330px"}
           w={"full"}
@@ -147,14 +155,14 @@ function ListCard({ list, listsLength, boardId, listData, onFetchData }) {
           position={"relative"}
         >
           {isLoading && <Loader />}
-          <CloseButton
+          <Icon
+            as={DeleteIcon}
+            fontSize={"15px"}
+            color="blue.500"
+            cursor="pointer"
             position="absolute"
-            top="0"
-            right="0"
-            color="black"
-            width="20px"
-            height="20px"
-            zIndex="10"
+            top="1"
+            right="1"
             onClick={() => {
               handleDeleteList(list.listId, list.position);
             }}

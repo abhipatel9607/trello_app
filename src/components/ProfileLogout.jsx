@@ -36,7 +36,7 @@ function ProfileLogout() {
         <MenuList>
           <Link to="/board">
             <MenuItem minH="40px">
-              <span>Board</span>
+              <span>Boards</span>
             </MenuItem>
           </Link>
           <MenuItem minH="40px">

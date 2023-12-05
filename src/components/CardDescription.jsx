@@ -1,4 +1,9 @@
-/* eslint-disable react/prop-types */
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 
 import {
@@ -22,6 +27,7 @@ function CardDescription({
   setCardDescription,
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [updateText, setUpdateText] = useState("Save");
 
   const handleUpdateCardData = async () => {
     try {
@@ -38,7 +44,7 @@ function CardDescription({
       };
 
       await updateData("card", cardId, updatedData);
-      console.log("Card updated successfully!");
+      setUpdateText("Saved");
     } catch (error) {
       console.error("Error updating card data:", error.message);
     } finally {
@@ -60,7 +66,10 @@ function CardDescription({
               border={"1px solid #888"}
               placeholder="Enter card name"
               value={cardTitle}
-              onChange={(e) => setCardTitle(e.target.value)}
+              onChange={(e) => {
+                setCardTitle(e.target.value);
+                setUpdateText("Save");
+              }}
             />
           </Flex>
         </FormControl>
@@ -80,7 +89,10 @@ function CardDescription({
               cursor="top-left"
               border={"1px solid #888"}
               value={cardDescription}
-              onChange={(e) => setCardDescription(e.target.value)}
+              onChange={(e) => {
+                setCardDescription(e.target.value);
+                setUpdateText("Save");
+              }}
             />
           </Flex>
         </FormControl>
@@ -94,11 +106,9 @@ function CardDescription({
           position={"relative"}
           overflow={"hidden"}
         >
-          Save
+          {updateText}
           {isLoading && <LoaderSmall />}
         </Button>
-
-        <Flex align={"center"}></Flex>
       </Flex>
     </Container>
   );

@@ -1,9 +1,4 @@
-/**
- * eslint-disable react/prop-types
- *
- * @format
- */
-
+/* eslint-disable react/prop-types */
 /** @format */
 
 import { Flex, ListItem, Icon } from "@chakra-ui/react";

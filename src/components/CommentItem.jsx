@@ -1,9 +1,15 @@
-/* eslint-disable react/prop-types */
+/**
+ * eslint-disable react/prop-types
+ *
+ * @format
+ */
+
 /** @format */
 
-import { List, Flex, Image, Text, CloseButton } from "@chakra-ui/react";
 import { useState } from "react";
 import { deleteRowFromTable } from "../googleSingIn/firebaseService";
+import { List, Flex, Image, Text, Icon } from "@chakra-ui/react";
+import { DeleteIcon } from "@chakra-ui/icons";
 import Loader from "./Loader";
 
 function CommentItem({ user, commentId, commentText, onGetComments }) {
@@ -41,14 +47,14 @@ function CommentItem({ user, commentId, commentText, onGetComments }) {
           </Text>
           <Text fontSize="sm">{commentText}</Text>
         </Flex>
-        <CloseButton
+        <Icon
+          as={DeleteIcon}
+          fontSize={"16px"}
+          color="blue.500"
+          cursor="pointer"
           position="absolute"
           top="2"
-          right="1"
-          color="black"
-          width="15px"
-          height="10px"
-          zIndex="10"
+          right="2"
           onClick={() => handleDeleteComment(commentId)}
         />
       </Flex>

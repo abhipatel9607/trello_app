@@ -1,10 +1,6 @@
-/**
- * eslint-disable react/prop-types
- *
- * @format
- */
-
+/* eslint-disable react/prop-types */
 /** @format */
+
 import {
   Center,
   Box,
@@ -21,7 +17,7 @@ function CreateNewList({
   onCreateList,
 }) {
   return (
-    <Center flexShrink={0} alignItems={"start"} py={6} width={"260px"}>
+    <Center flexShrink={0} alignItems={"start"} width={"260px"}>
       <Box
         maxW={"330px"}
         w={"full"}

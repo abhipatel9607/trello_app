@@ -1,6 +1,6 @@
 /** @format */
 import { List, Flex, Checkbox, Input, Button } from "@chakra-ui/react";
-
+import { DeleteIcon } from "@chakra-ui/icons";
 import { useState } from "react";
 import {
   updateData,
@@ -10,11 +10,11 @@ import LoaderSmall from "./LoaderSamll";
 
 // eslint-disable-next-line react/prop-types
 function TodoItem({ isCompleted, title, todoId, getTodos }) {
-  // State for managing todo title and checkbox state
   const [todoTitle, setTodoTitle] = useState(title || "");
   const [isChecked, setIsChecked] = useState(isCompleted || false);
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+  const [updateText, setUpdateText] = useState("Save");
 
   // Handler for checkbox change
   const handleCheckboxChange = () => {
@@ -35,7 +35,7 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
       };
 
       await updateData("todo", todoId, updatedData);
-      console.log("Updated");
+      setUpdateText("Saved");
     } catch (error) {
       console.error("Error updating todo data:", error.message);
     } finally {
@@ -71,16 +71,22 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
           size={"lg"}
           border={"1px solid #777"}
           isChecked={isChecked}
-          onChange={handleCheckboxChange}
+          onChange={() => {
+            handleCheckboxChange();
+            setUpdateText("Save");
+          }}
         ></Checkbox>
         {/* Input field for todo title */}
         <Input
           p={1}
-          width={"430px"}
+          width={"80%"}
           border={"1px solid #888"}
           placeholder="Enter Todo Here"
           value={todoTitle}
-          onChange={(e) => setTodoTitle(e.target.value)}
+          onChange={(e) => {
+            setTodoTitle(e.target.value);
+            setUpdateText("Save");
+          }}
           style={{
             textDecoration: isChecked ? "line-through" : "none",
           }}
@@ -94,7 +100,7 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
             position={"relative"}
             overflow={"hidden"}
           >
-            Save
+            {updateText}
             {isLoadingUpdate && <LoaderSmall />}
           </Button>
           <Button
@@ -104,8 +110,8 @@ function TodoItem({ isCompleted, title, todoId, getTodos }) {
             position={"relative"}
             overflow={"hidden"}
           >
-            Delete
             {isLoadingDelete && <LoaderSmall />}
+            {<DeleteIcon />}
           </Button>
         </Flex>
       </Flex>

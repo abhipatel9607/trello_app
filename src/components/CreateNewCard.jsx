@@ -5,7 +5,6 @@
  */
 
 /** @format */
-
 import { Flex, Input, IconButton } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import Loader from "./Loader";

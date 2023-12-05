@@ -88,7 +88,6 @@ function ListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardId]);
 
-  
   // Fetch board details
   useEffect(() => {
     const getBoardDetail = async () => {
@@ -114,18 +113,17 @@ function ListPage() {
       bgSize="cover"
       bgPosition="center"
       minH="100vh"
-      width={"100vw"}
       centerContent
       position={"relative"}
     >
       {isLoadingBoardData && <Loader />}
-      <Container p="8" pl={4} color="black" width={"100vw"} maxW="7xl">
+      <Container pl={4} color="black" width={"96vw"} maxW="7xl">
         <SectionHeader text={boardData ? boardData.title : "Loading..."} />
         <Flex
           gap="4"
+          mt={4}
           wrap="no-wrap"
           overflowX="auto"
-          marginTop="16px"
           alignItems={"start"}
         >
           {listData.map((list) => (
